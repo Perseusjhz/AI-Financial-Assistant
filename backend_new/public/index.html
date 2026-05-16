@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>攒钱搭子 AI</title>
+<!-- 原版 CSS，一字未改 -->
+<link rel="stylesheet" href="/orig/styles.css"/>
+<style>
+/* ── App shell ── */
+html,body,#root { height:100%; margin:0; overflow:hidden; }
+body { background:var(--bg-0); }
+#root { max-width:430px; margin:0 auto; position:relative; height:100vh; overflow:hidden; }
+.top-safe { height:env(safe-area-inset-top,10px); flex-shrink:0; }
+
+/* ── 毛玻璃 token ── */
+:root {
+  --glass-light:  rgba(255,255,255,0.58);
+  --glass-mid:    rgba(255,255,255,0.42);
+  --glass-dark:   rgba(16,16,20,0.78);
+  --glass-blur:   blur(32px) saturate(200%);
+  --glass-blur-sm:blur(20px) saturate(160%);
+  --glass-border-light: 0.5px solid rgba(255,255,255,0.85);
+  --glass-border-dark:  0.5px solid rgba(255,255,255,0.12);
+  --glass-inset:  inset 0 1px 0 rgba(255,255,255,0.88);
+  --glass-inset-dark: inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+/* ── 通用毛玻璃类 ── */
+.glass-light {
+  background: var(--glass-light);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border-light);
+  box-shadow: var(--glass-inset), 0 4px 20px rgba(0,0,0,0.06);
+}
+.glass-dark {
+  background: var(--glass-dark);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border-dark);
+  box-shadow: var(--glass-inset-dark), 0 12px 36px rgba(0,0,0,0.28);
+  color: #fff;
+}
+
+/* ── 输入框毛玻璃 ── */
+input, textarea, .field-input {
+  background: rgba(255,255,255,0.60) !important;
+  backdrop-filter: var(--glass-blur-sm) !important;
+  -webkit-backdrop-filter: var(--glass-blur-sm) !important;
+  border: var(--glass-border-light) !important;
+  box-shadow: var(--glass-inset) !important;
+}
+input:focus, textarea:focus {
+  background: rgba(255,255,255,0.78) !important;
+  border-color: rgba(200,255,58,0.6) !important;
+  box-shadow: var(--glass-inset), 0 0 0 3px rgba(200,255,58,0.18) !important;
+}
+
+/* ── 底部弹出面板 ── */
+.edit-sheet {
+  position:absolute; left:0; right:0; bottom:0; z-index:80;
+  background: rgba(245,244,241,0.82);
+  backdrop-filter: blur(50px) saturate(220%);
+  -webkit-backdrop-filter: blur(50px) saturate(220%);
+  border-radius:32px 32px 0 0;
+  border-top: var(--glass-border-light);
+  box-shadow: 0 -12px 48px rgba(0,0,0,0.16), var(--glass-inset);
+  padding:16px 20px 40px;
+  transform:translateY(0);
+  transition:transform .35s cubic-bezier(.2,.85,.3,1);
+}
+.edit-sheet.hidden { transform:translateY(100%); }
+.edit-sheet .handle {
+  width:38px; height:4px; border-radius:999px;
+  background:rgba(0,0,0,0.15); margin:0 auto 18px;
+}
+
+/* ── 按钮 ── */
+.btn-glass {
+  background: var(--glass-light);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border-light);
+  box-shadow: var(--glass-inset);
+}
+.btn-glass-dark {
+  background: rgba(10,10,14,0.88);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border-dark);
+  box-shadow: var(--glass-inset-dark);
+  color:#fff;
+}
+
+/* ── 快捷 chip ── */
+.chip {
+  background: rgba(255,255,255,0.60);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: var(--glass-border-light);
+  box-shadow: var(--glass-inset), 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px; font-weight: 600; color: #3a3a38;
+  cursor: pointer; white-space: nowrap;
+}
+
+/* ── 动画 ── */
+@keyframes mb-bounce {
+  0%,80%,100% { transform:translateY(0); opacity:0.4; }
+  40% { transform:translateY(-3px); opacity:1; }
+}
+@keyframes fade-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.fade-in { animation:fade-in .3s ease both; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- ① 原版 components.jsx，一字未改 -->
+<script type="text/babel" src="/orig/components.jsx"></script>
+
+<!-- ② 原版 ios-frame / design-canvas 的空桩（screens.jsx 里没有用到，但为防报错） -->
+<script type="text/babel">
+// stubs so nothing breaks
+window.IOSDevice = window.IOSDevice || (({children})=>children);
+</script>
+
+<!-- ③ 真实 App：原版视觉 + API 接入 -->
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ─── helpers ─────────────────────────────────────────────────── */
+function inkOn(hex) {
+  const m=/^#?([a-f0-9]{6})$/i.exec(hex);
+  if(!m)return'#0a0a0a';
+  const n=parseInt(m[1],16);
+  const r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  const lin=c=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
+  const L=0.2126*lin(r)+0.7152*lin(g)+0.0722*lin(b);
+  return L>0.55?'#0a0a0a':'#ffffff';
+}
+async function apiPost(path, body) {
+  const r = await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'请求失败');}
+  return r.json();
+}
+function getLS(key,def=null){try{return JSON.parse(localStorage.getItem(key))||def;}catch{return def;}}
+function setLS(key,val){localStorage.setItem(key,JSON.stringify(val));}
+
+/* StatusBar 已移除 */
+
+/* ─── DonutChart ──────────────────────────────────────────────── */
+
+/* ─── 3D 旋转饼图 ────────────────────────────────────────────── */
+function SolidPieChart({ spent, total, accent }) {
+  const remaining = Math.max(0, total - spent);
+  const overBudget = total > 0 && spent > total;
+  const usedPct   = total > 0 ? Math.min(1, spent / total) : 0;
+  const remainPct = 1 - usedPct;
+
+  // ── Animation ──────────────────────────────────────────────────
+  const angleRef = useRef(0);
+  const [angle,  setAngle]  = useState(0);
+  const rafRef   = useRef(null);
+  const t0Ref    = useRef(null);
+  useEffect(()=>{
+    function frame(ts){
+      if(!t0Ref.current) t0Ref.current = ts;
+      angleRef.current = ((ts - t0Ref.current) * 0.022) % 360; // ~28s/rev
+      setAngle(angleRef.current);
+      rafRef.current = requestAnimationFrame(frame);
+    }
+    rafRef.current = requestAnimationFrame(frame);
+    return ()=>{ cancelAnimationFrame(rafRef.current); };
+  },[]);
+
+  // ── SVG pie math ───────────────────────────────────────────────
+  const CX=70, CY=70, R=66;
+  const pt = pct => {
+    const a = -Math.PI/2 + pct*2*Math.PI;
+    return [CX+R*Math.cos(a), CY+R*Math.sin(a)];
+  };
+  const arcPath = (f,t)=>{
+    const s=t-f;
+    if(s<=0.0001) return null;
+    if(s>=0.9999) return `M ${CX} ${CY-R} A ${R} ${R} 0 1 1 ${CX-0.01} ${CY-R} Z`;
+    const [x1,y1]=pt(f),[x2,y2]=pt(t);
+    return `M ${CX} ${CY} L ${x1} ${y1} A ${R} ${R} 0 ${s>0.5?1:0} 1 ${x2} ${y2} Z`;
+  };
+  const [s1x,s1y]=pt(usedPct), [s2x,s2y]=pt(0);
+
+  // Dynamic shadow offset follows the rotation
+  const shadowX = Math.round(Math.sin(angle*Math.PI/180)*12);
+  const shadowY = Math.round(Math.cos(angle*Math.PI/180)*4 + 8);
+
+  return (
+    <div style={{
+      margin:'0 18px 20px',
+      background:'rgba(255,255,255,0.58)',
+      backdropFilter:'blur(32px) saturate(200%)',
+      WebkitBackdropFilter:'blur(32px) saturate(200%)',
+      borderRadius:28, padding:'18px 20px 20px',
+      border:'0.5px solid rgba(255,255,255,0.85)',
+      boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9),0 4px 20px rgba(0,0,0,0.06)',
+    }}>
+
+      {/* 标题 */}
+      <div style={{marginBottom:16}}>
+        <span style={{fontSize:14,fontWeight:800,color:'#0a0a0a',letterSpacing:'-0.01em'}}>本月余额</span>
+      </div>
+
+      <div style={{display:'flex',alignItems:'center',gap:18}}>
+
+        {/* ── 3D 旋转饼图 ── */}
+        <div style={{
+          flexShrink:0, width:140, height:140,
+          perspective:'600px',
+          perspectiveOrigin:'50% 40%',
+        }}>
+          <div style={{
+            width:140, height:140,
+            transform:`rotateX(52deg) rotateZ(${angle}deg)`,
+            transformStyle:'preserve-3d',
+            transformOrigin:'50% 50%',
+            willChange:'transform',
+          }}>
+            {/* ── 厚度层（3D 侧面）── */}
+            {[12,9,6,3].map(z=>(
+              <div key={z} style={{
+                position:'absolute',inset:0,
+                transform:`translateZ(-${z}px)`,
+                pointerEvents:'none',
+              }}>
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                  {arcPath(0,usedPct)   && <path d={arcPath(0,usedPct)}   fill={`rgba(6,6,10,${0.7+z*0.025})`}/>}
+                  {arcPath(usedPct,1)   && <path d={arcPath(usedPct,1)}   fill={`rgba(160,210,35,${0.55+z*0.02})`}/>}
+                </svg>
+              </div>
+            ))}
+
+            {/* ── 正面 ── */}
+            <div style={{position:'absolute',inset:0}}>
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <defs>
+                  <filter id="glw3d" x="-35%" y="-35%" width="170%" height="170%">
+                    <feGaussianBlur stdDeviation="5" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  <radialGradient id="shine3d" cx="30%" cy="28%" r="55%">
+                    <stop offset="0%"   stopColor="rgba(255,255,255,0.35)"/>
+                    <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
+                  </radialGradient>
+                </defs>
+                {/* 深色扇形 */}
+                {arcPath(0,usedPct) && <path d={arcPath(0,usedPct)} fill="#0d0d11"/>}
+                {/* lime 扇形 + 辉光 */}
+                {arcPath(usedPct,1) && <>
+                  <path d={arcPath(usedPct,1)} fill={accent} filter="url(#glw3d)"/>
+                  <path d={arcPath(usedPct,1)} fill="url(#shine3d)"/>
+                </>}
+                {/* 白色分割线 */}
+                {usedPct>0.005&&usedPct<0.995&&<>
+                  <line x1={CX} y1={CY} x2={s1x} y2={s1y} stroke="rgba(255,255,255,0.85)" strokeWidth="1.8" strokeLinecap="round"/>
+                  <line x1={CX} y1={CY} x2={s2x} y2={s2y} stroke="rgba(255,255,255,0.85)" strokeWidth="1.8" strokeLinecap="round"/>
+                </>}
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 右侧数据 ── */}
+        <div style={{flex:1}}>
+          {[
+            {dot:accent,    glow:true,  label:'剩余', val:remaining, pct:Math.round(remainPct*100)},
+            {dot:'#0d0d11', glow:false, label:'已花', val:spent,     pct:Math.round(usedPct*100)},
+          ].map(r=>(
+            <div key={r.label} style={{marginBottom:18}}>
+              <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:3}}>
+                <div style={{
+                  width:8,height:8,borderRadius:2,
+                  background:r.dot,flexShrink:0,
+                  boxShadow:r.glow?`0 0 10px ${r.dot}aa`:'none',
+                }}/>
+                <span style={{fontSize:11,color:'#9a9a96',fontWeight:600,letterSpacing:'0.02em'}}>{r.label}</span>
+              </div>
+              <div style={{display:'flex',alignItems:'baseline',gap:5,paddingLeft:15}}>
+                <span className="num" style={{
+                  fontSize:24,fontWeight:900,letterSpacing:'-0.04em',
+                  color:overBudget&&r.label==='剩余'?'#e53935':'#0a0a0a',
+                }}>
+                  ¥{r.val.toLocaleString('zh-CN')}
+                </span>
+                <span style={{fontSize:11.5,color:'#c0c0bc',fontWeight:700}}>{r.pct}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── InteractiveChart（周/月/年切换 + hover tooltip）────────── */
+function InteractiveChart({ accent, budget }) {
+  const [period,    setPeriod]   = useState('week');
+  const [chartInfo, setChartInfo] = useState(null);
+  const [tooltip,   setTooltip]  = useState(null); // {idx, x, y}
+  const svgRef = useRef(null);
+
+  useEffect(()=>{
+    fetch(`/api/chart-data?period=${period}`)
+      .then(r=>r.json()).then(setChartInfo).catch(()=>{});
+  },[period]);
+
+  const data      = chartInfo?.chartData || [];
+  const predicted = chartInfo?.predictedCount || 0;
+  const subtitle  = chartInfo?.subtitle || '';
+  const bgt       = chartInfo?.budget ?? budget ?? 84;
+
+  // ── SVG math ──────────────────────────────────────────────────
+  const W=320, H=150, PAD={t:24,r:14,b:30,l:14};
+  const plotW=W-PAD.l-PAD.r, plotH=H-PAD.t-PAD.b;
+  const amounts = data.map(d=>d.amount);
+  const minV    = amounts.length ? Math.max(0, Math.min(...amounts)*0.6) : 0;
+  const maxV    = amounts.length ? Math.max(...amounts)*1.25 : 100;
+  const toX = i  => PAD.l + (i/(Math.max(data.length-1,1)))*plotW;
+  const toY = v  => PAD.t + plotH - ((v-minV)/(maxV-minV||1))*plotH;
+  const pts  = data.map((d,i)=>({x:toX(i),y:toY(d.amount),...d}));
+
+  function smooth(arr) {
+    if(arr.length<2) return '';
+    let p=`M ${arr[0].x} ${arr[0].y}`;
+    for(let i=0;i<arr.length-1;i++){
+      const p0=arr[Math.max(0,i-1)],p1=arr[i],p2=arr[i+1],p3=arr[Math.min(arr.length-1,i+2)];
+      const c1x=p1.x+(p2.x-p0.x)/6, c1y=p1.y+(p2.y-p0.y)/6;
+      const c2x=p2.x-(p3.x-p1.x)/6, c2y=p2.y-(p3.y-p1.y)/6;
+      p+=` C ${c1x},${c1y} ${c2x},${c2y} ${p2.x},${p2.y}`;
+    }
+    return p;
+  }
+
+  const splitAt   = data.length - predicted;
+  const actualPts = pts.slice(0,splitAt);
+  const predPts   = pts.slice(splitAt-1);
+  const actualD   = smooth(actualPts);
+  const predD     = smooth(predPts);
+  const baseline  = PAD.t+plotH+1;
+  const fillD     = actualPts.length>=2
+    ? `${actualD} L ${actualPts.at(-1).x},${baseline} L ${actualPts[0].x},${baseline} Z` : '';
+
+  const budgetY = toY(bgt);
+  const fillId  = 'cf';
+
+  // ── Interaction ───────────────────────────────────────────────
+  function getIdx(clientX) {
+    if(!svgRef.current||!data.length) return null;
+    const rect = svgRef.current.getBoundingClientRect();
+    const frac  = (clientX - rect.left) / rect.width;
+    const idx   = Math.round(frac * (data.length-1));
+    return Math.max(0, Math.min(data.length-1, idx));
+  }
+  function onMove(e) {
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const idx = getIdx(cx);
+    if(idx===null) return;
+    const p = pts[idx];
+    if(p) setTooltip({idx, x:p.x, y:p.y, d:data[idx]});
+  }
+  function onLeave() { setTooltip(null); }
+
+  const hov = tooltip ? pts[tooltip.idx] : null;
+
+  return (
+    <div style={{
+      margin:'0 18px 20px',
+      background:'rgba(255,255,255,0.58)',
+      backdropFilter:'blur(32px) saturate(200%)',WebkitBackdropFilter:'blur(32px) saturate(200%)',
+      borderRadius:28,padding:'16px 14px 10px',
+      border:'0.5px solid rgba(255,255,255,0.85)',
+      boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9),0 4px 20px rgba(0,0,0,0.06)',
+    }}>
+      {/* header */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'0 6px 4px'}}>
+        <div style={{display:'flex',gap:10,alignItems:'baseline'}}>
+          <span style={{fontSize:14,fontWeight:800,color:'#0a0a0a'}}>消费趋势</span>
+          <span style={{fontSize:11,color:'#9a9a96',fontWeight:600}}>{subtitle}</span>
+        </div>
+        {/* period tabs */}
+        <div style={{display:'flex',gap:2,background:'rgba(0,0,0,0.05)',borderRadius:999,padding:3}}>
+          {['week','month','year'].map((p,i)=>{
+            const lbl=['周','月','年'][i];
+            const on=period===p;
+            return(
+              <button key={p} onClick={()=>setPeriod(p)} style={{
+                fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,border:0,cursor:'pointer',
+                background:on?'#0a0a0a':'transparent',
+                color:on?'#fff':'#9a9a96',
+                transition:'all .2s',
+              }}>{lbl}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* SVG chart */}
+      <div style={{position:'relative',userSelect:'none'}}>
+        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" preserveAspectRatio="none"
+          style={{display:'block',touchAction:'none',cursor:'crosshair'}}
+          onMouseMove={onMove} onMouseLeave={onLeave}
+          onTouchMove={e=>{e.preventDefault();onMove(e);}} onTouchEnd={onLeave}>
+          <defs>
+            <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0a0a0a" stopOpacity="0.10"/>
+              <stop offset="100%" stopColor="#0a0a0a" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+
+          {/* budget line */}
+          <line x1={PAD.l} y1={budgetY} x2={W-PAD.r} y2={budgetY}
+            stroke="#c8c8c4" strokeWidth="1" strokeDasharray="4 5"/>
+          <text x={W-PAD.r-3} y={budgetY-6} textAnchor="end"
+            fontSize="9.5" fill="#b0b0ac" fontWeight="700">预算 ¥{bgt}</text>
+
+          {/* area fill */}
+          {fillD&&<path d={fillD} fill={`url(#${fillId})`}/>}
+
+          {/* actual line */}
+          {actualD&&<path d={actualD} fill="none" stroke="#0a0a0a" strokeWidth="2.8"
+            strokeLinecap="round" strokeLinejoin="round"/>}
+
+          {/* predicted dashed */}
+          {predPts.length>=2&&<path d={predD} fill="none" stroke="#c8c8c4"
+            strokeWidth="2" strokeDasharray="5 4" strokeLinecap="round"/>}
+
+          {/* hover highlight line */}
+          {hov&&<line x1={hov.x} y1={PAD.t} x2={hov.x} y2={PAD.t+plotH}
+            stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>}
+
+          {/* hover dot */}
+          {hov&&<>
+            <circle cx={hov.x} cy={hov.y} r={14} fill={accent} opacity="0.25"/>
+            <circle cx={hov.x} cy={hov.y} r={6}  fill={accent}/>
+            <circle cx={hov.x} cy={hov.y} r={6}  fill="none" stroke="#0a0a0a" strokeWidth="2"/>
+          </>}
+
+          {/* x-axis labels */}
+          {data.map((d,i)=>(
+            <text key={i} x={toX(i)} y={H-6} textAnchor="middle"
+              fontSize="9.5" fontWeight="600"
+              fill={i>=splitAt?'#c8c8c4':i===tooltip?.idx?'#0a0a0a':'#9a9a96'}>
+              {d.label}
+            </text>
+          ))}
+        </svg>
+
+        {/* TOOLTIP */}
+        {tooltip&&hov&&(()=>{
+          const d   = data[tooltip.idx];
+          const svgW = svgRef.current?.getBoundingClientRect().width || 320;
+          const pctX = hov.x / W;                   // 0..1
+          const tipW = 110;
+          let left    = pctX * svgW - tipW/2;
+          left = Math.max(8, Math.min(svgW - tipW - 8, left));
+          const pctY = (hov.y - PAD.t) / plotH;     // 0..1
+          const top  = pctY < 0.45 ? hov.y/(H)*100+8+'%' : undefined;
+          const bot  = pctY >= 0.45 ? (1 - hov.y/H)*100+8+'%' : undefined;
+          return(
+            <div style={{
+              position:'absolute',left,top,bottom:bot,
+              width:tipW,zIndex:10,
+              background:'rgba(10,10,14,0.88)',
+              backdropFilter:'blur(20px) saturate(180%)',WebkitBackdropFilter:'blur(20px) saturate(180%)',
+              border:'0.5px solid rgba(255,255,255,0.14)',
+              borderRadius:14,padding:'9px 12px',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.10),0 8px 24px rgba(0,0,0,0.30)',
+              pointerEvents:'none',
+            }}>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:600,marginBottom:2}}>{d.date||d.label}</div>
+              <div className="num" style={{fontSize:20,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>¥{d.amount}</div>
+              {d.overBudget&&<div style={{fontSize:9.5,color:accent,fontWeight:700,marginTop:2}}>超支 ¥{d.amount-(bgt||0)}</div>}
+              {d.items?.length>0&&<div style={{fontSize:9,color:'rgba(255,255,255,0.45)',marginTop:3,lineHeight:1.4}}>
+                {d.items.slice(0,3).join('\n')}
+              </div>}
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  );
+}
+
+/* ─── BackBar ────────────────────────────────────────────────── */
+function BackBar({title,onBack}){
+  return(
+    <div style={{display:'flex',alignItems:'center',gap:4,padding:'4px 18px 18px'}}>
+      <button onClick={onBack} className="press" style={{width:36,height:36,borderRadius:18,border:0,background:'transparent',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',marginLeft:-8}}>
+        <Icon.Back size={22} color="#0a0a0a"/>
+      </button>
+      <span style={{fontSize:15,fontWeight:600,color:'#0a0a0a'}}>{title}</span>
+    </div>
+  );
+}
+
+/* ─── EditSheet（底部弹出输入框） ────────────────────────────── */
+function EditSheet({open,onClose,fields,values,onChange,onSubmit,loading,accent,accentInk}){
+  return(
+    <>
+      <div onClick={onClose} style={{
+        position:'absolute',inset:0,zIndex:70,
+        background:'rgba(10,10,12,0.20)',
+        backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
+        opacity:open?1:0,pointerEvents:open?'auto':'none',transition:'opacity .2s',
+      }}/>
+      <div className={`edit-sheet${open?'':' hidden'}`}>
+        <div className="handle"/>
+        <div style={{fontSize:15,fontWeight:800,marginBottom:16,color:'#0a0a0a'}}>修改计划基础</div>
+        <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:16}}>
+          {fields.map(f=>(
+            <div key={f.key} style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{fontSize:12,fontWeight:700,color:'#9a9a96',width:72,flexShrink:0}}>{f.label}</span>
+              <input type="number" inputMode="numeric" value={values[f.key]||''} onChange={e=>onChange(f.key,e.target.value)}
+                placeholder={f.placeholder}
+                style={{flex:1,background:'rgba(0,0,0,0.05)',border:'0.5px solid rgba(0,0,0,0.10)',
+                  borderRadius:12,padding:'10px 12px',font:'inherit',fontSize:15,color:'#0a0a0a',outline:'none'}}/>
+              <span style={{fontSize:12,color:'#9a9a96',flexShrink:0}}>{f.unit}</span>
+            </div>
+          ))}
+        </div>
+        <button onClick={onSubmit} disabled={loading} style={{
+          width:'100%',padding:'15px',border:0,borderRadius:18,
+          background:loading?'#c8c8c4':accent,color:loading?'#fff':accentInk,
+          font:'inherit',fontSize:15,fontWeight:800,cursor:'pointer',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.22),0 6px 20px rgba(0,0,0,0.22)',
+        }}>
+          {loading?'计算中…':'生成新计划'}
+        </button>
+      </div>
+    </>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HOME SCREEN  — 原版视觉 + 实时数据
+   ════════════════════════════════════════════════════════════════ */
+function HomeScreen({onNav,accent,accentInk,navStyle,chatOpen}){
+  const [s,setS]=useState(null);
+
+  useEffect(()=>{
+    // 直接从后端 db 读，不需要传参
+    fetch('/api/home-stats').then(r=>r.json()).then(setS).catch(()=>{});
+  },[]);
+
+  const chartData=(s?.chartData)||[
+    {label:'5/10',amount:62},{label:'5/11',amount:88},{label:'5/12',amount:45},
+    {label:'5/13',amount:102},{label:'5/14',amount:71},{label:'5/15',amount:58},
+    {label:'今天',amount:84},{label:'5/17',amount:78},{label:'5/18',amount:78},
+  ];
+  const dailyAvg=s?.dailyAvg||72;
+  const remaining=s?.remainingDays||16;
+  const progress=s?.planProgress||0;
+
+  return(
+    <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      <div className="wallpaper"/>
+      <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
+        <h1 className="num" style={{margin:'0 22px 4px',fontSize:38,fontWeight:800,letterSpacing:'-0.04em',lineHeight:1.05}}>攒钱总览</h1>
+        <div style={{margin:'0 22px 18px',color:'#9a9a96',fontSize:13,fontWeight:500}}>
+          距离月底还有 <span style={{color:'#0a0a0a',fontWeight:700}}>{remaining} 天</span> · 计划完成 {progress}%
+        </div>
+
+        {/* HERO */}
+        <div className="dotmask" style={{
+          margin:'0 18px 16px',borderRadius:28,
+          background:'rgba(16,16,20,0.80)',
+          backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
+          border:'0.5px solid rgba(255,255,255,0.14)',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 12px 40px rgba(0,0,0,0.32)',
+          padding:'20px 22px 22px',color:'#fff',position:'relative',overflow:'hidden',
+        }}>
+
+          {/* ── 头像（右上角大圆，直径 ≈ 65% 卡片宽）── */}
+          <div style={{
+            position:'absolute', top:2, right:0,
+            width:170, height:170,
+            borderRadius:'50%', overflow:'hidden',
+            zIndex:1, pointerEvents:'none',
+          }}>
+            <img src="/avatar.png" alt="" style={{
+              width:'100%', height:'100%',
+              objectFit:'cover', objectPosition:'center top',
+              opacity:0.88,
+            }}/>
+          </div>
+
+          {/* ── 左侧渐变遮罩（保护文字可读性）── */}
+          <div style={{
+            position:'absolute', inset:0, zIndex:2,
+            background:'linear-gradient(90deg, rgba(16,16,20,1) 45%, rgba(16,16,20,0.4) 68%, rgba(16,16,20,0) 82%)',
+            pointerEvents:'none',
+          }}/>
+
+          {/* ── 内容层（z-index 高于遮罩）── */}
+          <div style={{position:'relative', zIndex:3}}>
+            <div style={{fontSize:10,letterSpacing:'0.18em',textTransform:'uppercase',color:'rgba(255,255,255,0.5)',fontWeight:700}}>日均消费</div>
+
+            <div style={{display:'flex',alignItems:'flex-end',gap:6,margin:'12px 0 14px'}}>
+              <span className="num" style={{fontSize:72,fontWeight:900,lineHeight:0.9}}>{dailyAvg}</span>
+              <span style={{color:'rgba(255,255,255,0.5)',fontSize:18,fontWeight:500,marginBottom:8}}>元/天</span>
+            </div>
+
+            <div style={{marginTop:18,paddingTop:14,display:'flex',gap:22}}>
+              {[
+                {l:'已存',v:s?.saved||0,     u:`/ ${s?.savingGoal||600} 元`},
+                {l:'可花',v:s?.spendable>999?Math.round((s?.spendable||0)/100)/10+'k':s?.spendable||0, u:'本月余额'},
+                {l:'连击',v:s?.streak||0,    u:'天内未超支'},
+              ].map(k=>(
+                <div key={k.l}>
+                  <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:600,marginBottom:2}}>{k.l.toUpperCase()}</div>
+                  <div className="num" style={{fontSize:18,fontWeight:800}}>
+                    {k.v} <span style={{fontSize:10,color:'rgba(255,255,255,0.55)',fontWeight:500}}>{k.u}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 折线图 — 周/月/年切换 + hover tooltip */}
+        <InteractiveChart accent={accent} budget={s?.dailyBudget||84}/>
+
+        {/* 饼图 — 本月余额 */}
+        <SolidPieChart
+          spent={s?.spentThisMonth ?? 0}
+          total={s?.spendable ?? 1200}
+          accent={accent}
+          accentInk={accentInk}
+          remainingDays={s?.remainingDays ?? 15}
+        />
+
+        {/* QUICK ACTIONS */}
+        <div style={{padding:'0 22px 10px',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+          <h2 style={{fontSize:18,fontWeight:800,margin:0,letterSpacing:'-0.02em'}}>今天做什么</h2>
+          <span style={{fontSize:12,color:'#9a9a96',fontWeight:600}}>3 项</span>
+        </div>
+        <div style={{padding:'0 18px 36px',display:'flex',flexDirection:'column',gap:8}}>
+          {[
+            {tag:'计划',tagBg:accent,tagColor:accentInk,title:'还没复盘今天消费',desc:'记录今天花了多少',to:'review'},
+            {tag:'建议',tagBg:'#0a0a0a',tagColor:'#fff',title:'调整每日预算',desc:`按近期数据重新生成计划`,to:'plan'},
+            {tag:'学习',tagBg:'#f3f3f1',tagColor:'#0a0a0a',title:'理财风险问答',desc:'不推销 · 只解释风险',to:'risk'},
+          ].map(a=>(
+            <button key={a.to} onClick={()=>onNav(a.to)} className="press" style={{
+              width:'100%',textAlign:'left',border:0,
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',
+              WebkitBackdropFilter:'blur(28px) saturate(180%)',
+              borderRadius:22,padding:'14px 16px',
+              boxShadow:'0 1px 0 rgba(0,0,0,0.04),0 0 0 1px rgba(0,0,0,0.04)',
+              display:'flex',alignItems:'center',gap:12,cursor:'pointer',
+            }}>
+              <div style={{flex:1}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+                  <span style={{fontSize:10,fontWeight:800,padding:'2px 8px',borderRadius:999,
+                    background:a.tagBg,color:a.tagColor,letterSpacing:'0.04em'}}>{a.tag}</span>
+                </div>
+                <div style={{fontSize:14.5,fontWeight:700,color:'#0a0a0a'}}>{a.title}</div>
+                <div style={{fontSize:12,color:'#9a9a96',marginTop:2}}>{a.desc}</div>
+              </div>
+              <Icon.Chevron color="#c8c8c4"/>
+            </button>
+          ))}
+        </div>
+        <div style={{height:96}}/>
+      </div>
+      <BottomNav active="home" onNav={onNav} style={navStyle} accent={accent} chatOpen={chatOpen}/>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PLAN SCREEN  — 原版视觉 + 真实 API
+   ════════════════════════════════════════════════════════════════ */
+function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
+  const saved = getLS('mb_plan');
+  const [planStyle,setPlanStyle]=useState(saved?.style||'balanced');
+  const [result,setResult]=useState(saved||null);
+  const [editing,setEditing]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState('');
+  const [form,setForm]=useState({
+    monthlyIncome:saved?.monthlyIncome||'',
+    extraIncome:saved?.extraIncome||'',
+    fixedExpense:saved?.fixedExpense||'',
+    savingGoal:saved?.savingGoal||'',
+    remainingDays:saved?.remainingDays||String(new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()-new Date().getDate()),
+  });
+
+  function updateForm(k,v){setForm(p=>({...p,[k]:v}));}
+
+  async function submit(){
+    setErr('');setLoading(true);
+    try{
+      const data=await apiPost('/api/saving-plan',{
+        monthlyIncome:+form.monthlyIncome,extraIncome:+form.extraIncome||0,
+        fixedExpense:+form.fixedExpense,savingGoal:+form.savingGoal,
+        remainingDays:+form.remainingDays,style:planStyle,
+      });
+      setResult(data);
+      setLS('mb_plan',{...form,style:planStyle,
+        dailyBudget:data.dailyBudget,weeklyBudget:data.weeklyBudget,savingGoal:+form.savingGoal});
+      setEditing(false);
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  }
+
+  const fv=(key,fb)=>form[key]?Number(form[key]).toLocaleString('zh-CN'):fb;
+
+  return(
+    <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      <div className="wallpaper"/>
+      <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
+        <BackBar title="攒钱计划" onBack={()=>onNav('home')}/>
+        <div style={{padding:'0 22px'}}>
+          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>STEP 02 / 03</div>
+          <h1 className="num" style={{margin:'6px 0 4px',fontSize:34,fontWeight:800,letterSpacing:'-0.03em',lineHeight:1.1}}>
+            能存多少，<br/>我帮你算
+          </h1>
+          <p style={{color:'#9a9a96',fontSize:13.5,margin:'8px 0 22px'}}>
+            告诉我你的收入和目标，我会拆成每日预算和可行性评估
+          </p>
+        </div>
+
+        {/* RESULT BLOCK */}
+        {result ? (
+          <div className="fade-in" style={{
+            margin:'0 18px 18px',borderRadius:32,padding:'20px 22px 22px',
+            background:accent,color:accentInk,position:'relative',overflow:'hidden',
+            border:'0.5px solid rgba(255,255,255,0.20)',
+            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.10),0 12px 36px rgba(0,0,0,0.45)',
+          }}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div style={{fontSize:10,letterSpacing:'0.18em',fontWeight:800}}>EVERY DAY · 每日预算</div>
+              <span style={{background:'rgba(0,0,0,0.18)',color:'#fff',fontSize:10,fontWeight:800,padding:'4px 9px',borderRadius:999}}>
+                {result.feasibility==='较可行'?'✓ 可行':result.feasibility==='基本可行'?'✓ 基本可行':result.feasibility==='压力较大'?'⚡ 偏紧':'✗ 不可行'}
+              </span>
+            </div>
+            <div style={{display:'flex',alignItems:'flex-end',gap:8,marginTop:14}}>
+              <span className="num" style={{fontSize:92,fontWeight:900,lineHeight:0.85}}>{result.dailyBudget}</span>
+              <span style={{fontSize:18,fontWeight:600,marginBottom:10}}>元 / 天</span>
+            </div>
+            <div style={{
+              marginTop:18,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,
+              paddingTop:16,borderTop:'1px solid rgba(0,0,0,0.12)',
+            }}>
+              {[
+                {l:'每周',v:result.weeklyBudget,u:'元'},
+                {l:'本月可花',v:result.monthlySpendable?.toLocaleString('zh-CN'),u:'元'},
+                {l:'目标',v:result.savingGoal,u:'元'},
+              ].map(k=>(
+                <div key={k.l}>
+                  <div style={{fontSize:10,fontWeight:700,opacity:0.55}}>{k.l.toUpperCase()}</div>
+                  <div className="num" style={{fontSize:19,fontWeight:800,marginTop:2}}>
+                    {k.v}<span style={{fontSize:10,opacity:0.55,marginLeft:2}}>{k.u}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* 还没有计划时的提示卡 */
+          <div onClick={()=>setEditing(true)} style={{
+            margin:'0 18px 18px',borderRadius:28,padding:'20px 22px',
+            background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',border:'1.5px dashed rgba(0,0,0,0.10)',
+            textAlign:'center',cursor:'pointer',
+          }}>
+            <div style={{fontSize:13,color:'#9a9a96',marginBottom:6}}>还没有攒钱计划</div>
+            <div style={{fontSize:14,fontWeight:700,color:accent}}>点击填写 →</div>
+          </div>
+        )}
+
+        {/* AI COMMENTARY */}
+        {result?.reply && (
+          <div style={{margin:'0 18px 16px',display:'flex',gap:10,alignItems:'flex-start'}}>
+            <Buddy size={28} accent={accent}/>
+            <div style={{
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:'4px 18px 18px 18px',
+              padding:'12px 14px',fontSize:13.5,lineHeight:1.55,color:'#3a3a38',flex:1,
+            }}>{result.reply}</div>
+          </div>
+        )}
+
+        {/* FORM ROWS */}
+        <div style={{padding:'4px 22px 0',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+          <h2 style={{fontSize:15,fontWeight:800,margin:0}}>计划基础</h2>
+          <span onClick={()=>setEditing(true)} style={{fontSize:11,color:accent,fontWeight:700,cursor:'pointer'}}>
+            {result?'点击修改':'点击填写'}
+          </span>
+        </div>
+        <div style={{padding:'12px 18px',display:'flex',flexDirection:'column',gap:8}}>
+          {[
+            {label:'月生活费',key:'monthlyIncome',unit:'元',fb:'未填写'},
+            {label:'固定支出',key:'fixedExpense',unit:'元',fb:'未填写'},
+            {label:'本月目标',key:'savingGoal',unit:'元 / 月',fb:'未填写'},
+            {label:'剩余天数',key:'remainingDays',unit:'天',fb:'--'},
+          ].map(f=>(
+            <div key={f.key} onClick={()=>setEditing(true)} style={{
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:18,padding:'12px 16px',
+              display:'flex',alignItems:'center',gap:10,cursor:'pointer',
+            }}>
+              <span style={{fontSize:12,color:'#9a9a96',fontWeight:600,width:76}}>{f.label}</span>
+              <span className="num" style={{fontSize:18,fontWeight:800,color:form[f.key]?'#0a0a0a':'#c8c8c4'}}>
+                {fv(f.key,f.fb)}
+              </span>
+              <span style={{fontSize:11,color:'#9a9a96',fontWeight:500,flex:1}}>{form[f.key]?f.unit:''}</span>
+              <Icon.Chevron size={14} color="#c8c8c4"/>
+            </div>
+          ))}
+        </div>
+
+        {/* STYLE PICKER */}
+        <div style={{padding:'12px 22px 0',fontSize:15,fontWeight:800}}>风格</div>
+        <div style={{padding:'10px 18px 24px',display:'flex',gap:8}}>
+          {[{id:'strict',label:'严格',sub:'更激进'},{id:'balanced',label:'平衡',sub:'推荐'},{id:'relaxed',label:'宽松',sub:'更友好'}].map(o=>(
+            <button key={o.id} className="press" onClick={()=>setPlanStyle(o.id)} style={{
+              flex:1,border:0,cursor:'pointer',
+              background:planStyle===o.id?'#0a0a0a':'rgba(255,255,255,0.60)',
+              color:planStyle===o.id?'#fff':'#0a0a0a',
+              borderRadius:16,padding:'14px 8px',
+              display:'flex',flexDirection:'column',gap:4,alignItems:'center',
+            }}>
+              <span style={{fontSize:14,fontWeight:800}}>{o.label}</span>
+              <span style={{fontSize:10,opacity:0.6,fontWeight:600}}>{o.sub}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* NEXT ACTION BANNER */}
+        {result?.nextAction && (
+          <div style={{
+            margin:'0 18px 16px',padding:'14px 16px',
+            background:'rgba(20,20,24,0.82)',backdropFilter:'blur(36px) saturate(200%)',WebkitBackdropFilter:'blur(36px) saturate(200%)',
+            border:'0.5px solid rgba(255,255,255,0.10)',
+            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 8px 24px rgba(0,0,0,0.20)',
+            borderRadius:22,color:'#fff',display:'flex',alignItems:'center',gap:12,
+          }}>
+            <div style={{width:36,height:36,borderRadius:18,background:accent,display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <Icon.Spark color={accentInk} size={18}/>
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.60)',fontWeight:800,letterSpacing:'0.12em'}}>本周一件事</div>
+              <div style={{fontSize:13.5,fontWeight:700,marginTop:2}}>{result.nextAction}</div>
+            </div>
+            <Icon.Chevron color="#9a9a96"/>
+          </div>
+        )}
+        <div style={{height:96}}/>
+      </div>
+
+      <BottomNav active="plan" onNav={onNav} style={navStyle} accent={accent} chatOpen={chatOpen}/>
+
+      {/* EDIT SHEET */}
+      <EditSheet
+        open={editing} onClose={()=>{setEditing(false);setErr('');}}
+        fields={[
+          {key:'monthlyIncome',label:'月生活费',placeholder:'例：3000',unit:'元'},
+          {key:'extraIncome',label:'兼职/奖学金',placeholder:'没有填 0',unit:'元'},
+          {key:'fixedExpense',label:'固定支出',placeholder:'房租+话费等',unit:'元'},
+          {key:'savingGoal',label:'攒钱目标',placeholder:'例：600',unit:'元'},
+          {key:'remainingDays',label:'剩余天数',placeholder:'本月剩余',unit:'天'},
+        ]}
+        values={form} onChange={updateForm}
+        onSubmit={submit} loading={loading}
+        accent={accent} accentInk={accentInk}
+      />
+      {err&&<div style={{position:'absolute',bottom:160,left:20,right:20,zIndex:100,
+        padding:'12px 14px',background:'#fff0f0',borderRadius:14,fontSize:13,color:'#c01900',fontWeight:600,
+        boxShadow:'0 4px 16px rgba(0,0,0,0.10)'}}>⚠ {err}</div>}
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   REVIEW SCREEN  — 原版视觉 + 真实 API
+   ════════════════════════════════════════════════════════════════ */
+function ReviewScreen({onNav,accent,accentInk,navStyle,chatOpen}){
+  const plan=getLS('mb_plan');
+  const [inputOpen,setInputOpen]=useState(false);
+  const [text,setText]=useState('');
+  const [result,setResult]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState('');
+
+  async function submit(){
+    if(!text.trim())return;
+    setErr('');setLoading(true);
+    try{
+      const data=await apiPost('/api/expense-review',{text,dailyBudget:plan?.dailyBudget||0});
+      setResult(data);
+      setLS('mb_lastReview',{total:data.total,overBudget:data.overBudget,date:new Date().toLocaleDateString('zh-CN')});
+      setInputOpen(false);
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  }
+
+  const today=new Date().toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'});
+
+  const cats=(result?[
+    {key:'nec',tag:'必要',amount:result.catTotals.necessary,items:result.categories.necessary,tone:'gray'},
+    {key:'opt',tag:'可优化',amount:result.catTotals.optimizable,items:result.categories.optimizable,tone:'soft'},
+    {key:'imp',tag:'冲动',amount:result.catTotals.impulsive,items:result.categories.impulsive,tone:'accent'},
+    {key:'learn',tag:'学习',amount:result.catTotals.learning,items:result.categories.learning,tone:'dark'},
+  ]:[
+    {key:'nec',tag:'必要',amount:18,items:['食堂 ¥18'],tone:'gray'},
+    {key:'opt',tag:'可优化',amount:51,items:['奶茶 ¥16','外卖 ¥35'],tone:'soft'},
+    {key:'imp',tag:'冲动',amount:22,items:['打车 ¥22'],tone:'accent'},
+    {key:'learn',tag:'学习',amount:8,items:['打印资料 ¥8'],tone:'dark'},
+  ]).filter(c=>c.amount>0||c.items.length>0);
+
+  const total=result?.total||cats.reduce((s,c)=>s+c.amount,0);
+  const budget=plan?.dailyBudget||84;
+
+  return(
+    <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      <div className="wallpaper"/>
+      <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
+        <BackBar title="今日复盘" onBack={()=>onNav('home')}/>
+        <div style={{padding:'0 22px 4px'}}>
+          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>{today}</div>
+          <h1 className="num" style={{margin:'4px 0 0',fontSize:30,fontWeight:800,letterSpacing:'-0.03em'}}>复盘一下今天</h1>
+        </div>
+
+        {/* TOTAL HERO */}
+        <div style={{
+          margin:'18px 18px 16px',borderRadius:28,padding:'20px 22px 22px',
+          background:'rgba(16,16,20,0.80)',
+          backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
+          border:'0.5px solid rgba(255,255,255,0.14)',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 12px 40px rgba(0,0,0,0.32)',
+          color:'#fff',position:'relative',overflow:'hidden',
+        }}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div style={{fontSize:10,letterSpacing:'0.18em',fontWeight:800,color:'rgba(255,255,255,0.5)'}}>TODAY · 总支出</div>
+            {result ? (
+              result.overBudget
+                ? <span style={{background:accent,color:accentInk,fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999,display:'inline-flex',alignItems:'center',gap:3}}>
+                    <Icon.ArrowUp size={10} color={accentInk}/> 超支 ¥{result.overAmount}
+                  </span>
+                : <span style={{background:'#16b86c',color:'#fff',fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999}}>✓ 未超支</span>
+            ) : (
+              <span style={{background:accent,color:accentInk,fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999,display:'inline-flex',alignItems:'center',gap:3}}>
+                <Icon.ArrowUp size={10} color={accentInk}/> 超支 ¥{total-budget}
+              </span>
+            )}
+          </div>
+          <div style={{display:'flex',alignItems:'flex-end',gap:6,marginTop:12}}>
+            <span className="num" style={{fontSize:80,fontWeight:900,lineHeight:0.85}}>{total}</span>
+            <span style={{fontSize:18,color:'rgba(255,255,255,0.5)',fontWeight:500,marginBottom:8}}>元</span>
+          </div>
+          <div style={{marginTop:6,fontSize:12,color:'rgba(255,255,255,0.60)'}}>
+            预算 ¥{budget} · 用掉 <b style={{color:'#fff',fontWeight:800}}>{Math.min(999,Math.round(total/budget*100))}%</b>
+          </div>
+          {/* STACKED BAR */}
+          <div style={{height:8,background:'rgba(0,0,0,0.06)',borderRadius:999,marginTop:16,display:'flex',overflow:'hidden',gap:2}}>
+            {cats.map(c=>{
+              const fill=c.key==='nec'?'rgba(255,255,255,0.92)':c.key==='opt'?'rgba(255,255,255,0.60)':c.key==='imp'?accent:'rgba(255,255,255,0.25)';
+              return <div key={c.key} style={{width:`${c.amount/total*100}%`,background:fill}}/>;
+            })}
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:10}}>
+            {cats.map(c=>{
+              const fill=c.key==='nec'?'rgba(255,255,255,0.92)':c.key==='opt'?'rgba(255,255,255,0.60)':c.key==='imp'?accent:'rgba(255,255,255,0.25)';
+              return(
+                <div key={c.key} style={{fontSize:10,color:'#7a7a78',fontWeight:600,display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{width:6,height:6,borderRadius:999,background:fill}}/>
+                  {c.tag} <span style={{color:'rgba(255,255,255,0.85)',fontWeight:800}}>¥{c.amount}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* AI INSIGHT */}
+        {result?.reply && (
+          <div style={{margin:'0 18px 16px',display:'flex',gap:10,alignItems:'flex-start'}}>
+            <Buddy size={28} accent={accent}/>
+            <div style={{
+              background:'rgba(20,20,24,0.82)',backdropFilter:'blur(36px) saturate(200%)',WebkitBackdropFilter:'blur(36px) saturate(200%)',
+              color:'#fff',borderRadius:'4px 18px 18px 18px',
+              border:'0.5px solid rgba(255,255,255,0.10)',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 8px 22px rgba(0,0,0,0.20)',
+              padding:'12px 14px',fontSize:13.5,lineHeight:1.55,flex:1,
+            }}>
+              {result.reply}
+              <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.12)',
+                fontSize:11,color:'rgba(255,255,255,0.5)',display:'flex',justifyContent:'space-between'}}>
+                <span>明日预算 · ¥{budget}</span>
+                <span style={{color:accent,fontWeight:700}}>{result.nextAction}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CATEGORY LIST */}
+        <div style={{padding:'4px 22px',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+          <h2 style={{fontSize:15,fontWeight:800,margin:0}}>消费明细</h2>
+          <span onClick={()=>setInputOpen(true)} style={{fontSize:11,color:accent,fontWeight:700,cursor:'pointer'}}>
+            {result?'重新输入':'输入今日消费'}
+          </span>
+        </div>
+        <div style={{padding:'10px 18px 30px',display:'flex',flexDirection:'column',gap:8}}>
+          {cats.map(c=>{
+            const tile=c.tone==='accent'?{bg:accent,fg:accentInk}:c.tone==='dark'?{bg:'#2e2e2e',fg:'#fff'}:c.tone==='soft'?{bg:'#e7e7e3',fg:'#0a0a0a'}:{bg:'#f3f3f1',fg:'#0a0a0a'};
+            return(
+              <div key={c.key} style={{
+                background:'rgba(255,255,255,0.60)',backdropFilter:'blur(32px) saturate(200%)',WebkitBackdropFilter:'blur(32px) saturate(200%)',
+                borderRadius:20,padding:'14px 16px',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8),0 4px 18px rgba(0,0,0,0.05)',
+                border:'0.5px solid rgba(0,0,0,0.04)',display:'flex',alignItems:'center',gap:14,
+              }}>
+                <div style={{width:44,height:44,borderRadius:14,background:tile.bg,color:tile.fg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>{c.tag}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                    <span style={{fontSize:13,fontWeight:800}}>{c.tag}消费</span>
+                    <span className="num" style={{fontSize:18,fontWeight:800}}>¥{c.amount}</span>
+                  </div>
+                  <div style={{marginTop:4,fontSize:12,color:'#9a9a96',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.items.join('  ·  ')||'—'}</div>
+                </div>
+              </div>
+            );
+          })}
+          <button onClick={()=>setInputOpen(true)} className="press" style={{
+            border:'1.5px dashed rgba(0,0,0,0.10)',background:'transparent',
+            borderRadius:20,padding:'14px',color:'#9a9a96',
+            display:'flex',alignItems:'center',justifyContent:'center',gap:8,
+            fontSize:13,fontWeight:700,cursor:'pointer',
+          }}>
+            <Icon.Plus size={16} color="#9a9a96"/> 输入今天消费
+          </button>
+        </div>
+        <div style={{height:96}}/>
+      </div>
+      <BottomNav active="review" onNav={onNav} style={navStyle} accent={accent} chatOpen={chatOpen}/>
+
+      {/* INPUT SHEET */}
+      <>
+        <div onClick={()=>{setInputOpen(false);setErr('');}} style={{
+          position:'absolute',inset:0,zIndex:70,
+          background:'rgba(10,10,12,0.20)',
+          backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
+          opacity:inputOpen?1:0,pointerEvents:inputOpen?'auto':'none',transition:'opacity .2s',
+        }}/>
+        <div className={`edit-sheet${inputOpen?'':' hidden'}`} style={{zIndex:80}}>
+          <div className="handle"/>
+          <div style={{fontSize:15,fontWeight:800,marginBottom:6,color:'#0a0a0a'}}>输入今日消费</div>
+          <div style={{fontSize:12,color:'#9a9a96',marginBottom:12}}>用逗号分隔，金额跟在物品后面</div>
+          <textarea value={text} onChange={e=>setText(e.target.value)}
+            placeholder={'例：食堂18，奶茶16，外卖35，打车22，打印资料8'}
+            style={{width:'100%',minHeight:90,padding:'12px 14px',borderRadius:14,border:'0.5px solid rgba(0,0,0,0.10)',
+              background:'rgba(0,0,0,0.04)',font:'inherit',fontSize:14,color:'#0a0a0a',outline:'none',resize:'none',
+              boxSizing:'border-box',lineHeight:1.6}}/>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8,margin:'10px 0 14px'}}>
+            {['食堂18，奶茶16，外卖35','外卖28，咖啡22，地铁4','游戏充值50，食堂20'].map(s=>(
+              <button key={s} onClick={()=>setText(s)} style={{fontSize:11.5,padding:'6px 11px',borderRadius:999,border:'0.5px solid rgba(0,0,0,0.08)',cursor:'pointer',background:'rgba(255,255,255,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',color:'#6a6a68',fontWeight:600}}>{s}</button>
+            ))}
+          </div>
+          {err&&<div style={{padding:'10px 12px',background:'#fff0f0',borderRadius:12,fontSize:12,color:'#c01900',fontWeight:600,marginBottom:12}}>⚠ {err}</div>}
+          <button onClick={submit} disabled={loading||!text.trim()} style={{
+            width:'100%',padding:'15px',border:0,borderRadius:18,
+            background:loading||!text.trim()?'#c8c8c4':accent,color:loading||!text.trim()?'#fff':accentInk,
+            font:'inherit',fontSize:15,fontWeight:800,cursor:'pointer',
+            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.22),0 6px 20px rgba(0,0,0,0.22)',
+          }}>{loading?'分析中…':'开始复盘'}</button>
+        </div>
+      </>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RISK SCREEN  — 原版视觉 + 真实 API
+   ════════════════════════════════════════════════════════════════ */
+function RiskScreen({onNav,accent,accentInk,navStyle,chatOpen}){
+  const [question,setQuestion]=useState('');
+  const [sheetOpen,setSheetOpen]=useState(false);
+  const [result,setResult]=useState(null);
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState('');
+
+  async function submit(q){
+    const qq=q||question;
+    if(!qq.trim())return;
+    setErr('');setLoading(true);
+    try{
+      const data=await apiPost('/api/risk-education',{question:qq});
+      setResult(data);setSheetOpen(false);
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  }
+
+  const riskLevel=result?.riskScore!=null?result.riskScore-1:4;
+  const levels=['低','中低','中','高','极高'];
+  const displayQ=result?.question||'我能不能拿生活费买虚拟货币？';
+
+  return(
+    <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      <div className="wallpaper"/>
+      <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
+        <BackBar title="理财风险" onBack={()=>onNav('home')}/>
+        <div style={{padding:'0 22px 4px'}}>
+          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>NOT FINANCIAL ADVICE</div>
+          <h1 className="num" style={{margin:'4px 0 8px',fontSize:30,fontWeight:800,letterSpacing:'-0.03em',lineHeight:1.15}}>
+            不推销，<br/>只帮你看懂风险
+          </h1>
+        </div>
+
+        {/* QUESTION CHIP */}
+        <div onClick={()=>setSheetOpen(true)} style={{
+          margin:'14px 18px 0',
+          background:'rgba(20,20,24,0.82)',backdropFilter:'blur(36px) saturate(200%)',WebkitBackdropFilter:'blur(36px) saturate(200%)',
+          border:'0.5px solid rgba(255,255,255,0.10)',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 8px 22px rgba(0,0,0,0.20)',
+          borderRadius:22,padding:'14px 16px',color:'#fff',cursor:'pointer',
+        }}>
+          <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:800,letterSpacing:'0.16em'}}>你问</div>
+          <div style={{fontSize:15,fontWeight:700,marginTop:4}}>{displayQ}</div>
+        </div>
+
+        {/* RISK GAUGE */}
+        <div style={{
+          margin:'14px 18px 16px',borderRadius:28,padding:'22px 22px 18px',
+          background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',
+          WebkitBackdropFilter:'blur(28px) saturate(180%)',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8),0 4px 18px rgba(0,0,0,0.05)',
+          border:'0.5px solid rgba(0,0,0,0.04)',
+        }}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+            <div style={{fontSize:10,fontWeight:800,color:'#9a9a96',letterSpacing:'0.16em'}}>风险等级</div>
+            <span style={{background:accent,color:accentInk,fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999}}>
+              {result?.studentSuitability||'学生不适合'}
+            </span>
+          </div>
+          <div style={{display:'flex',alignItems:'flex-end',gap:8,marginTop:6}}>
+            <span className="num" style={{fontSize:64,fontWeight:900,lineHeight:0.85,color:'#0a0a0a'}}>{result?.riskLevel||'极高'}</span>
+            <span style={{fontSize:13,color:'#9a9a96',fontWeight:600,marginBottom:8}}>{(riskLevel+1)} / 5 级</span>
+          </div>
+          <div style={{marginTop:18,display:'flex',gap:4}}>
+            {levels.map((_,i)=>{
+              const tones=['#dededa','#b8b8b3','#7c7c78','#3e3e3c',accent];
+              return <div key={i} style={{flex:1,height:8,borderRadius:999,background:i<=riskLevel?tones[i]:'#f3f3f1'}}/>;
+            })}
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:8}}>
+            {levels.map((l,i)=>(
+              <span key={l} style={{fontSize:10,fontWeight:700,color:i===riskLevel?'#0a0a0a':'#c8c8c4'}}>{l}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* AI EXPLANATION */}
+        <div style={{margin:'0 18px 16px',display:'flex',gap:10,alignItems:'flex-start'}}>
+          <Buddy size={28} accent={accent}/>
+          <div style={{
+            background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:'4px 18px 18px 18px',
+            padding:'14px 16px',fontSize:13.5,lineHeight:1.6,color:'#0a0a0a',flex:1,
+          }}>
+            {result?.reply||<>直接说结论：<b>不能。</b>不是道德判断，是数学问题 ——
+              <ul style={{margin:'8px 0 0',paddingLeft:18,fontSize:13,color:'#3a3a38'}}>
+                <li style={{marginBottom:4}}>日内 30~50% 波动属于常态</li>
+                <li style={{marginBottom:4}}>生活费 = 不可承受损失的钱</li>
+                <li>你需要的是「亏完不影响下个月吃饭」的余钱</li>
+              </ul>
+            </>}
+          </div>
+        </div>
+
+        {/* REASON CARDS */}
+        <div style={{padding:'0 22px',fontSize:15,fontWeight:800,marginBottom:10}}>该问之前先想</div>
+        <div style={{padding:'0 18px 12px',display:'flex',flexDirection:'column',gap:8}}>
+          {(result?.reasons||[
+            {t:'损失上限',d:'极端情况会归零，能接受这笔钱完全消失吗？'},
+            {t:'应急备份',d:'生活费是用来吃饭住宿的，没有冗余金'},
+            {t:'资产配置',d:'高风险资产应 ≤ 总余钱的 5%，不是 100%'},
+          ]).map((r,n)=>(
+            <div key={n} style={{
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',
+              WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:20,padding:'14px 16px',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8),0 4px 18px rgba(0,0,0,0.05)',
+              border:'0.5px solid rgba(0,0,0,0.04)',display:'flex',alignItems:'flex-start',gap:14,
+            }}>
+              <span className="num" style={{fontSize:24,fontWeight:900,color:'#c8c8c4',width:26,flexShrink:0}}>0{n+1}</span>
+              <div>
+                {typeof r==='string'
+                  ? <div style={{fontSize:13,color:'#3a3a38',lineHeight:1.5}}>{r}</div>
+                  : <><div style={{fontSize:13.5,fontWeight:800}}>{r.t}</div><div style={{fontSize:12,color:'#9a9a96',marginTop:3}}>{r.d}</div></>
+                }
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* SUGGESTION */}
+        <div style={{
+          margin:'8px 18px 16px',padding:'14px 16px',background:accent,backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',borderRadius:22,color:accentInk,border:'0.5px solid rgba(255,255,255,0.20)',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.22),0 8px 22px rgba(0,0,0,0.35)',
+          display:'flex',alignItems:'center',gap:12,
+        }}>
+          <Icon.Spark color={accentInk} size={20}/>
+          <div style={{flex:1}}>
+            <div style={{fontSize:10,fontWeight:800,opacity:0.55,letterSpacing:'0.12em'}}>建议</div>
+            <div style={{fontSize:13,fontWeight:700,marginTop:1}}>{result?.nextAction||'先存够 3 个月生活费，再考虑投资'}</div>
+          </div>
+        </div>
+
+        <div style={{padding:'4px 22px 0',fontSize:10.5,color:'#bdbdb8',textAlign:'center',lineHeight:1.5}}>
+          🔒 {result?.disclaimer||'本回答仅供理财教育参考，不构成任何投资建议'}
+        </div>
+        <div style={{height:96}}/>
+      </div>
+      <BottomNav active="risk" onNav={onNav} style={navStyle} accent={accent} chatOpen={chatOpen}/>
+
+      {/* QUESTION SHEET */}
+      <>
+        <div onClick={()=>{setSheetOpen(false);setErr('');}} style={{
+          position:'absolute',inset:0,zIndex:70,
+          background:'rgba(10,10,12,0.20)',
+          backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
+          opacity:sheetOpen?1:0,pointerEvents:sheetOpen?'auto':'none',transition:'opacity .2s',
+        }}/>
+        <div className={`edit-sheet${sheetOpen?'':' hidden'}`} style={{zIndex:80}}>
+          <div className="handle"/>
+          <div style={{fontSize:15,fontWeight:800,marginBottom:6,color:'#0a0a0a'}}>问一个理财问题</div>
+          <div style={{fontSize:12,color:'#9a9a96',marginBottom:12}}>不推销产品，只解释风险</div>
+          <textarea value={question} onChange={e=>setQuestion(e.target.value)}
+            placeholder={'例：我能不能拿生活费买基金？大学生适合买股票吗？'}
+            style={{width:'100%',minHeight:80,padding:'12px 14px',borderRadius:14,border:'0.5px solid rgba(0,0,0,0.10)',
+              background:'rgba(0,0,0,0.04)',font:'inherit',fontSize:14,color:'#0a0a0a',outline:'none',resize:'none',
+              boxSizing:'border-box',lineHeight:1.6}}/>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8,margin:'10px 0 14px'}}>
+            {['生活费能买基金吗','大学生适合买股票吗','我可以买币吗','货币基金安全吗','可以借钱投资吗'].map(s=>(
+              <button key={s} onClick={()=>submit(s)} style={{fontSize:11.5,padding:'6px 11px',borderRadius:999,border:'0.5px solid rgba(0,0,0,0.08)',cursor:'pointer',background:'rgba(255,255,255,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',color:'#6a6a68',fontWeight:600}}>{s}</button>
+            ))}
+          </div>
+          {err&&<div style={{padding:'10px 12px',background:'#fff0f0',borderRadius:12,fontSize:12,color:'#c01900',fontWeight:600,marginBottom:12}}>⚠ {err}</div>}
+          <button onClick={()=>submit()} disabled={loading||!question.trim()} style={{
+            width:'100%',padding:'15px',border:0,borderRadius:18,
+            background:loading||!question.trim()?'#c8c8c4':accent,color:loading||!question.trim()?'#fff':accentInk,
+            font:'inherit',fontSize:15,fontWeight:800,cursor:'pointer',
+            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.22),0 6px 20px rgba(0,0,0,0.22)',
+          }}>{loading?'分析中…':'解释这个风险'}</button>
+        </div>
+      </>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PROFILE SCREEN  — 原版视觉
+   ════════════════════════════════════════════════════════════════ */
+function ProfileScreen({onNav,accent,accentInk,navStyle,chatOpen}){
+  const plan=getLS('mb_plan');
+  const review=getLS('mb_lastReview');
+  return(
+    <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      <div className="wallpaper"/>
+      <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
+        <div style={{padding:'0 22px 4px'}}>
+          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.16em'}}>ACCOUNT</div>
+          <h1 className="num" style={{margin:'4px 0 18px',fontSize:34,fontWeight:800,letterSpacing:'-0.03em'}}>我的</h1>
+        </div>
+
+        {/* USER CARD */}
+        <div style={{
+          margin:'0 18px 16px',
+          background:'rgba(16,16,20,0.80)',
+          backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
+          border:'0.5px solid rgba(255,255,255,0.14)',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 12px 40px rgba(0,0,0,0.32)',
+          borderRadius:26,padding:'18px',color:'#fff',display:'flex',alignItems:'center',gap:14,
+        }}>
+          <Buddy size={56} accent={accent}/>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:17,fontWeight:800}}>同学</div>
+            <div style={{fontSize:12,color:'rgba(255,255,255,0.60)',marginTop:2}}>本地账户 · 无需登录</div>
+            <div style={{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}}>
+              <span style={{fontSize:10.5,fontWeight:800,padding:'4px 9px',borderRadius:999,background:'rgba(255,255,255,0.12)',color:'#fff'}}>非营销认证</span>
+              {plan&&<span style={{fontSize:10.5,fontWeight:800,padding:'4px 9px',borderRadius:999,background:accent,color:accentInk,display:'inline-flex',alignItems:'center',gap:4}}>
+                <Icon.Flame size={10} color={accentInk}/> 已设置计划
+              </span>}
+            </div>
+          </div>
+        </div>
+
+        {/* STATS */}
+        <div style={{padding:'0 18px 18px',display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+          {[
+            {v:plan?plan.dailyBudget+'元':'--',l:'每日预算',s:plan?plan.style==='strict'?'严格':'平衡':'未设置'},
+            {v:review?'¥'+review.total:'--',l:'上次复盘',s:review?review.date:'无记录'},
+            {v:plan?'¥'+plan.savingGoal:'--',l:'攒钱目标',s:plan?'元/月':'未设置'},
+          ].map(s=>(
+            <div key={s.l} style={{background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:20,padding:'14px 10px',textAlign:'center'}}>
+              <div className="num" style={{fontSize:22,fontWeight:900,letterSpacing:'-0.04em',lineHeight:1}}>{s.v}</div>
+              <div style={{fontSize:11,color:'#0a0a0a',fontWeight:700,marginTop:6}}>{s.l}</div>
+              <div style={{fontSize:10,color:'#9a9a96',marginTop:1}}>{s.s}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* FINANCIAL PROFILE */}
+        <div style={{padding:'0 22px 8px',fontSize:16,fontWeight:800}}>财务画像</div>
+        <div style={{padding:'0 18px 22px',display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:6}}>
+          {[
+            {v:plan?.monthlyIncome?'¥'+Number(plan.monthlyIncome).toLocaleString('zh-CN'):'--',l:'月生活费'},
+            {v:plan?'¥'+(plan.monthlyIncome-(plan.fixedExpense||0)):'--',l:'可支配'},
+            {v:plan?'¥'+plan.savingGoal:'--',l:'攒钱目标'},
+            {v:plan?.style==='strict'?'严格':plan?.style==='relaxed'?'宽松':'平衡',l:'风格'},
+          ].map(s=>(
+            <div key={s.l} style={{background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:16,padding:'12px 6px',textAlign:'center'}}>
+              <div className="num" style={{fontSize:15,fontWeight:900,letterSpacing:'-0.03em'}}>{s.v}</div>
+              <div style={{fontSize:10,color:'#9a9a96',marginTop:4,fontWeight:600}}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* SETTINGS */}
+        <div style={{padding:'0 22px 8px',fontSize:16,fontWeight:800}}>设置</div>
+        <div style={{padding:'0 18px',display:'flex',flexDirection:'column',gap:8}}>
+          {[
+            {Ic:Icon.Target,title:'攒钱计划',desc:plan?`¥${plan.dailyBudget}/天 · 平衡模式`:'未设置',to:'plan'},
+            {Ic:Icon.Shield,title:'隐私与数据',desc:'所有数据存在本地 · 不上传',to:null},
+          ].map((s,i)=>(
+            <button key={i} onClick={()=>s.to&&onNav(s.to)} className="press" style={{
+              width:'100%',textAlign:'left',border:0,
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(32px) saturate(200%)',WebkitBackdropFilter:'blur(32px) saturate(200%)',
+              borderRadius:20,padding:'12px 14px',cursor:s.to?'pointer':'default',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8),0 4px 18px rgba(0,0,0,0.05)',border:'0.5px solid rgba(0,0,0,0.04)',
+              display:'flex',alignItems:'center',gap:14,
+            }}>
+              <div style={{width:38,height:38,borderRadius:12,background:'rgba(0,0,0,0.06)',border:'0.5px solid rgba(255,255,255,0.14)',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.18)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                <s.Ic size={18} color="#0a0a0a"/>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontSize:14,fontWeight:800}}>{s.title}</div>
+                <div style={{fontSize:11.5,color:'#9a9a96',marginTop:2}}>{s.desc}</div>
+              </div>
+              {s.to&&<Icon.Chevron color="#c8c8c4"/>}
+            </button>
+          ))}
+        </div>
+
+        <div style={{padding:'20px 18px 8px'}}>
+          <button className="press" onClick={()=>{if(confirm('确认清除全部本地数据？')){localStorage.clear();window.location.reload();}}} style={{
+            width:'100%',background:'transparent',border:'1px solid rgba(0,0,0,0.08)',
+            borderRadius:20,padding:'14px',cursor:'pointer',fontSize:14,fontWeight:700,color:'#0a0a0a',
+          }}>清除本地数据</button>
+        </div>
+        <div style={{padding:'12px 28px 24px',fontSize:10,color:'#bdbdb8',textAlign:'center',lineHeight:1.5}}>
+          v1.0 · 本产品不推销任何金融产品<br/>所有回答仅供理财教育参考
+        </div>
+        <div style={{height:96}}/>
+      </div>
+      <BottomNav active="me" onNav={onNav} style={navStyle} accent={accent} chatOpen={chatOpen}/>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CHAT OVERLAY  — 原版视觉 + 真实 API
+   ════════════════════════════════════════════════════════════════ */
+function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
+  const INIT=[{id:'init',role:'assistant',text:'你好呀，我是攒钱搭子 👋\n可以拆目标、复盘消费、解释风险 —— 你今天想聊哪个？'}];
+  const [msgs,setMsgs]=useState(INIT);
+  const [input,setInput]=useState('');
+  const [typing,setTyping]=useState(false);
+  const bottomRef=useRef(null);
+  const plan=getLS('mb_plan');
+
+  useEffect(()=>{
+    if(open)setTimeout(()=>bottomRef.current?.scrollIntoView({behavior:'smooth'}),100);
+  },[msgs,open,typing]);
+
+  async function send(text){
+    const t=(text??input).trim(); if(!t)return;
+    setInput('');
+    setMsgs(m=>[...m,{id:Date.now()+'u',role:'user',text:t}]);
+    setTyping(true);
+    try{
+      const data=await apiPost('/api/chat',{message:t,profile:plan});
+      setTyping(false);
+      let card=null;
+      if(data.card){
+        const c=data.card;
+        if(c.type==='expense_review_card')
+          card={label:'今日支出',value:String(c.total),unit:'元',badge:c.overBudget?`超¥${c.overAmount}`:'未超支',sub:`必要¥${c.catTotals.necessary} 可优化¥${c.catTotals.optimizable}`};
+        else if(c.type==='saving_plan_card')
+          card={label:'每日预算',value:String(c.dailyBudget),unit:'元/天',badge:c.feasibility,sub:`每周¥${c.weeklyBudget}`};
+        else if(c.type==='risk_education_card')
+          card={label:'风险等级',value:c.riskLevel,unit:`${c.riskScore}/5`,badge:c.studentSuitability,sub:c.disclaimer};
+      }
+      setMsgs(m=>[...m,{id:Date.now()+'a',role:'assistant',text:data.reply,card}]);
+    }catch{
+      setTyping(false);
+      setMsgs(m=>[...m,{id:Date.now()+'a',role:'assistant',text:'网络好像出了点问题，稍后再试？'}]);
+    }
+  }
+
+  return(
+    <>
+      <div onClick={onClose} style={{
+        position:'absolute',inset:0,zIndex:40,
+        background:'rgba(10,10,12,0.18)',
+        backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
+        opacity:open?1:0,pointerEvents:open?'auto':'none',transition:'opacity .25s ease',
+      }}/>
+      <div style={{
+        position:'absolute',left:10,right:10,bottom:90,
+        height:'58%',zIndex:50,borderRadius:32,
+        background:'rgba(255,255,255,0.62)',
+        backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
+        border:'0.5px solid rgba(255,255,255,0.8)',
+        boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9),0 -8px 40px rgba(0,0,0,0.18)',
+        transform:open?'translateY(0) scale(1)':'translateY(40px) scale(0.96)',
+        opacity:open?1:0,pointerEvents:open?'auto':'none',
+        transition:'transform .35s cubic-bezier(.2,.85,.3,1),opacity .25s ease',
+        display:'flex',flexDirection:'column',overflow:'hidden',
+      }}>
+        {/* HEADER */}
+        <div style={{padding:'14px 18px 10px',display:'flex',alignItems:'center',gap:10,borderBottom:'0.5px solid rgba(0,0,0,0.06)',position:'relative',background:'rgba(255,255,255,0.30)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)'}}>
+          <div style={{position:'absolute',top:7,left:'50%',transform:'translateX(-50%)',width:38,height:4,borderRadius:999,background:'rgba(0,0,0,0.18)'}}/>
+          <Buddy size={32} variant={avatarVariant} accent={accent}/>
+          <div style={{flex:1,marginTop:4}}>
+            <div style={{fontSize:14,fontWeight:800,color:'#0a0a0a'}}>攒钱搭子</div>
+            <div style={{display:'flex',alignItems:'center',gap:5}}>
+              <span style={{width:5,height:5,borderRadius:999,background:'#16b86c'}}/>
+              <span style={{fontSize:10.5,color:'#9a9a96',fontWeight:600}}>实时同步 · 不推销产品</span>
+            </div>
+          </div>
+          <button onClick={onClose} className="press" style={{width:36,height:36,borderRadius:18,border:0,background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
+            <Icon.Plus size={18} color="#0a0a0a" style={{transform:'rotate(45deg)'}}/>
+          </button>
+        </div>
+
+        {/* MESSAGES */}
+        <div className="app-scroll" style={{flex:1,overflowY:'auto',padding:'14px 16px 8px'}}>
+          {msgs.map(m=>(
+            <div key={m.id} style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start',alignItems:'flex-end',gap:8,marginBottom:10}}>
+              {m.role==='assistant'&&<Buddy size={28} variant={avatarVariant} accent={accent}/>}
+              <div style={{
+                maxWidth:'78%',padding:'10px 14px',fontSize:13.5,lineHeight:1.55,
+                background:m.role==='user'?'rgba(10,10,14,0.90)':'rgba(255,255,255,0.72)',backdropFilter:'blur(24px) saturate(180%)',WebkitBackdropFilter:'blur(24px) saturate(180%)',
+                color:m.role==='user'?'#fff':'#0a0a0a',
+                border:m.role==='user'?'0.5px solid rgba(255,255,255,0.12)':'0.5px solid rgba(255,255,255,0.9)',
+                boxShadow:m.role==='user'?'inset 0 1px 0 rgba(255,255,255,0.10),0 4px 14px rgba(0,0,0,0.18)':'0 1px 3px rgba(0,0,0,0.05)',
+                borderRadius:m.role==='user'?'20px 20px 6px 20px':'20px 20px 20px 6px',
+                whiteSpace:'pre-wrap',
+              }}>
+                {m.text}
+                {m.card&&(
+                  <div style={{marginTop:8,padding:'10px 12px',borderRadius:14,background:'rgba(255,255,255,0.45)',backdropFilter:'blur(16px)',WebkitBackdropFilter:'blur(16px)',border:'0.5px solid rgba(255,255,255,0.80)'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                      <span style={{fontSize:10,fontWeight:800,color:'#9a9a96',letterSpacing:'0.12em'}}>{m.card.label}</span>
+                      {m.card.badge&&<span style={{fontSize:10,fontWeight:800,padding:'2px 7px',borderRadius:999,background:accent,color:accentInk}}>{m.card.badge}</span>}
+                    </div>
+                    <div style={{display:'flex',alignItems:'flex-end',gap:4,marginTop:4}}>
+                      <span className="num" style={{fontSize:26,fontWeight:900,color:'#0a0a0a'}}>{m.card.value}</span>
+                      <span style={{fontSize:12,color:'#9a9a96',fontWeight:600,marginBottom:2}}>{m.card.unit}</span>
+                    </div>
+                    {m.card.sub&&<div style={{fontSize:10.5,color:'#9a9a96',marginTop:2}}>{m.card.sub}</div>}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {typing&&(
+            <div style={{display:'flex',alignItems:'flex-end',gap:8,marginBottom:10}}>
+              <Buddy size={28} variant={avatarVariant} accent={accent}/>
+              <div style={{padding:'12px 16px',borderRadius:'20px 20px 20px 6px',background:'rgba(255,255,255,0.72)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',border:'0.5px solid rgba(255,255,255,0.88)',display:'flex',gap:4,alignItems:'center'}}>
+                {[0,1,2].map(i=><span key={i} style={{width:5,height:5,borderRadius:999,background:'#9a9a96',animation:`mb-bounce 1.2s ${i*150}ms infinite ease-in-out`}}/>)}
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef}/>
+        </div>
+
+        {/* CHIPS */}
+        {msgs.length<=2&&(
+          <div style={{display:'flex',gap:6,overflowX:'auto',padding:'0 16px 8px'}}>
+            {['帮我算每日预算','今天能买基金吗','存 600 难吗','消费分类'].map(c=>(
+              <button key={c} onClick={()=>send(c)} className="press" style={{flexShrink:0,fontSize:12,fontWeight:600,padding:'7px 12px',borderRadius:999,cursor:'pointer',background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',color:'#3a3a38',whiteSpace:'nowrap',border:'0.5px solid rgba(0,0,0,0.06)'}}>{c}</button>
+            ))}
+          </div>
+        )}
+
+        {/* INPUT */}
+        <div style={{padding:'8px 12px 14px',display:'flex',gap:8,alignItems:'center',background:'rgba(255,255,255,0.30)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)'}}>
+          <input value={input} onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}}
+            placeholder="有什么想问的…"
+            style={{flex:1,fontSize:14,padding:'12px 16px',borderRadius:22,
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',border:'0.5px solid rgba(0,0,0,0.06)',
+              outline:'none',color:'#0a0a0a',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9)'}}/>
+          <button onClick={()=>send()} disabled={!input.trim()} className="press" style={{
+            width:44,height:44,borderRadius:22,border:0,cursor:'pointer',
+            background:input.trim()?accent:'#c8c8c4',color:'#fff',
+            display:'flex',alignItems:'center',justifyContent:'center',
+            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.22),0 4px 14px rgba(0,0,0,0.18)',
+          }}>
+            <Icon.Send size={18} color="#fff"/>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   APP ROOT
+   ════════════════════════════════════════════════════════════════ */
+const ACCENT='#c8ff3a';
+const ACCENT_INK=inkOn(ACCENT);
+
+function App(){
+  const [screen,setScreen]=useState('home');
+  const [chatOpen,setChatOpen]=useState(false);
+
+  useEffect(()=>{
+    const m=/^#?([a-f0-9]{6})$/i.exec(ACCENT);
+    if(m){
+      const n=parseInt(m[1],16);
+      const r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+      document.documentElement.style.setProperty('--accent',ACCENT);
+      document.documentElement.style.setProperty('--accent-ink',ACCENT_INK);
+      document.documentElement.style.setProperty('--accent-glow',`rgba(${r},${g},${b},0.22)`);
+    }
+  },[]);
+
+  function nav(id){
+    if(id==='chat'){setChatOpen(o=>!o);return;}
+    setChatOpen(false);setScreen(id);
+  }
+
+  const props={onNav:nav,accent:ACCENT,accentInk:ACCENT_INK,navStyle:'fab',chatOpen};
+
+  return(
+    <div style={{height:'100vh',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden',maxWidth:430,margin:'0 auto',background:'var(--bg-0)'}}>
+      <div className="top-safe"/>
+      <div style={{flex:1,position:'relative',overflow:'hidden'}}>
+        {screen==='home'   && <HomeScreen    {...props}/>}
+        {screen==='plan'   && <PlanScreen    {...props}/>}
+        {screen==='review' && <ReviewScreen  {...props}/>}
+        {screen==='risk'   && <RiskScreen    {...props}/>}
+        {screen==='me'     && <ProfileScreen {...props}/>}
+        <ChatOverlay open={chatOpen} onClose={()=>setChatOpen(false)} accent={ACCENT} accentInk={ACCENT_INK}/>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

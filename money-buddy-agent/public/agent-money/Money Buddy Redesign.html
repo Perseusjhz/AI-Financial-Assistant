@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>攒钱搭子 AI · 设计探索</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    @keyframes mb-bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-3px); opacity: 1; }
+    }
+  </style>
+<script src="vendor/react.development.js"></script>
+<script src="vendor/react-dom.development.js"></script>
+<script>
+window.claude = {
+  complete: async function(payload) {
+    const res = await fetch('/api/claude-complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('agent request failed');
+    return JSON.stringify(await res.json());
+  }
+};
+</script>
+</head>
+<body>
+<div id="root"></div>
+<script src="ios-frame.compiled.js"></script>
+<script src="design-canvas.compiled.js"></script>
+<script src="tweaks-panel.compiled.js"></script>
+<script src="components.compiled.js"></script>
+<script src="chat-overlay.compiled.js"></script>
+<script src="screens.compiled.js"></script>
+<script src="app.compiled.js"></script>
+</body>
+</html>

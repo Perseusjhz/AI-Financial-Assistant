@@ -1,0 +1,21 @@
+{
+  "name": "攒钱搭子 AI",
+  "short_name": "攒钱搭子",
+  "description": "不推销理财产品，只陪你把生活费管明白",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0fdf4",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
