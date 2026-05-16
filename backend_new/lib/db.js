@@ -35,22 +35,22 @@ function seed() {
   const today    = new Date();
   const spending = [];
 
-  // 生成过去 14 天的随机消费记录
+  // 生成过去 14 天的消费记录（每天 5-7 条，金额真实细碎）
   const templates = [
-    { items:['食堂¥20','外卖¥38','奶茶¥16'],               catTotals:{necessary:20,optimizable:54,impulsive:0,learning:0} },
-    { items:['食堂¥18','地铁¥6','咖啡¥22','教材¥45'],      catTotals:{necessary:24,optimizable:22,impulsive:0,learning:45} },
-    { items:['食堂¥22','外卖¥32','打车¥18','零食¥12'],      catTotals:{necessary:22,optimizable:62,impulsive:0,learning:0} },
-    { items:['食堂¥20','超市¥35','地铁¥6'],                catTotals:{necessary:61,optimizable:0,impulsive:0,learning:0} },
-    { items:['外卖¥42','奶茶¥19','游戏充值¥30'],            catTotals:{necessary:0,optimizable:61,impulsive:30,learning:0} },
-    { items:['食堂¥18','食堂¥16','打印资料¥8','地铁¥6'],    catTotals:{necessary:40,optimizable:0,impulsive:0,learning:8} },
-    { items:['食堂¥22','外卖¥28','咖啡¥18','打车¥22'],      catTotals:{necessary:22,optimizable:68,impulsive:0,learning:0} },
-    { items:['超市¥48','地铁¥6','奶茶¥16'],                catTotals:{necessary:54,optimizable:16,impulsive:0,learning:0} },
-    { items:['食堂¥20','外卖¥45','零食¥15','打车¥15'],      catTotals:{necessary:20,optimizable:75,impulsive:0,learning:0} },
-    { items:['食堂¥18','课程¥99','地铁¥6'],                catTotals:{necessary:24,optimizable:0,impulsive:0,learning:99} },
-    { items:['食堂¥22','外卖¥35','奶茶¥18'],               catTotals:{necessary:22,optimizable:53,impulsive:0,learning:0} },
-    { items:['食堂¥20','打车¥25','零食¥18','游戏充值¥50'],  catTotals:{necessary:20,optimizable:43,impulsive:50,learning:0} },
-    { items:['食堂¥18','超市¥32','地铁¥8'],                catTotals:{necessary:58,optimizable:0,impulsive:0,learning:0} },
-    { items:['外卖¥38','咖啡¥22','打印资料¥12'],            catTotals:{necessary:0,optimizable:60,impulsive:0,learning:12} },
+    { items:['早餐包子¥5','食堂午饭¥13','地铁¥4','奶茶¥18','食堂晚饭¥10','零食薯片¥8','洗衣¥6'],       catTotals:{necessary:38,optimizable:26,impulsive:0,learning:0} },
+    { items:['早餐煎饼¥7','食堂午饭¥12','地铁¥4','瑞幸咖啡¥15','外卖晚饭¥32','教材¥45','水果¥8'],      catTotals:{necessary:31,optimizable:47,impulsive:0,learning:45} },
+    { items:['早餐豆浆¥6','食堂午饭¥14','奶茶¥20','打车¥18','食堂晚饭¥11','零食¥9','地铁¥4'],          catTotals:{necessary:35,optimizable:47,impulsive:0,learning:0} },
+    { items:['早餐¥6','食堂午饭¥12','地铁¥4','食堂晚饭¥10','超市日用品¥28','水果¥8','公交¥3'],         catTotals:{necessary:71,optimizable:0,impulsive:0,learning:0} },
+    { items:['早餐¥5','外卖午饭¥28','奶茶¥19','外卖晚饭¥32','游戏充值¥30','零食¥7'],                  catTotals:{necessary:5,optimizable:79,impulsive:30,learning:0} },
+    { items:['早餐包子¥5','食堂午饭¥13','地铁¥4','食堂晚饭¥11','打印资料¥8','公交¥3','洗衣¥6'],        catTotals:{necessary:42,optimizable:0,impulsive:0,learning:8} },
+    { items:['早餐¥6','食堂午饭¥13','咖啡¥18','外卖晚饭¥28','打车¥22','零食¥8','地铁¥4'],             catTotals:{necessary:23,optimizable:66,impulsive:0,learning:0} },
+    { items:['早餐煎饼¥7','食堂午饭¥12','地铁¥4','奶茶¥16','食堂晚饭¥10','超市¥24','水果¥8'],         catTotals:{necessary:57,optimizable:20,impulsive:0,learning:0} },
+    { items:['早餐¥5','食堂午饭¥14','奶茶¥20','外卖晚饭¥35','地铁¥4','零食¥12','纸巾¥8'],             catTotals:{necessary:31,optimizable:67,impulsive:0,learning:0} },
+    { items:['早餐¥6','食堂午饭¥13','地铁¥4','网课报名¥99','食堂晚饭¥11','咖啡¥15','公交¥3'],          catTotals:{necessary:37,optimizable:15,impulsive:0,learning:99} },
+    { items:['早餐豆浆¥6','食堂午饭¥12','地铁¥4','外卖晚饭¥28','奶茶¥18','零食¥8','洗衣¥6'],          catTotals:{necessary:28,optimizable:46,impulsive:0,learning:0} },
+    { items:['早餐¥5','食堂午饭¥13','打车¥22','零食¥8','游戏充值¥50','食堂晚饭¥10','奶茶¥18'],         catTotals:{necessary:28,optimizable:48,impulsive:50,learning:0} },
+    { items:['早餐包子¥5','食堂午饭¥14','地铁¥4','食堂晚饭¥12','奶茶¥18','卫生纸¥8','水果¥7'],         catTotals:{necessary:50,optimizable:18,impulsive:0,learning:0} },
+    { items:['早餐煎饼¥7','食堂午饭¥13','地铁¥4','咖啡¥15','外卖晚饭¥35','奶茶¥18','洗衣¥6'],         catTotals:{necessary:30,optimizable:68,impulsive:0,learning:0} },
   ];
 
   for (let i = 13; i >= 0; i--) {

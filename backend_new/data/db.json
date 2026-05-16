@@ -1,30 +1,37 @@
 {
   "profile": {
-    "monthlyIncome": 2500,
+    "monthlyIncome": 5000,
     "extraIncome": 0,
-    "fixedExpense": 200,
-    "savingGoal": 300,
-    "remainingDays": 14,
+    "fixedExpense": 50,
+    "savingGoal": 1000,
+    "remainingDays": "21",
     "style": "balanced",
-    "dailyBudget": 143,
-    "weeklyBudget": 1001,
-    "monthlySpendable": 2000,
+    "dailyBudget": 247,
+    "weeklyBudget": 1729,
+    "monthlySpendable": 3950,
     "feasibility": "较可行",
     "savedAmount": 320,
-    "streak": 3
+    "streak": 3,
+    "totalIncome": 3000,
+    "availableIncome": 2950
   },
   "spending": [
     {
       "date": "2026-05-02",
-      "total": 74,
+      "total": 82,
       "items": [
-        "食堂¥20",
-        "外卖¥38",
-        "奶茶¥16"
+        "早餐包子¥5",
+        "食堂午饭¥13",
+        "地铁¥4",
+        "奶茶¥18",
+        "食堂晚饭¥10",
+        "零食薯片¥8",
+        "洗衣¥6",
+        "纸巾¥8"
       ],
       "catTotals": {
-        "necessary": 20,
-        "optimizable": 54,
+        "necessary": 46,
+        "optimizable": 26,
         "impulsive": 0,
         "learning": 0
       },
@@ -33,34 +40,42 @@
     },
     {
       "date": "2026-05-03",
-      "total": 91,
+      "total": 137,
       "items": [
-        "食堂¥18",
-        "地铁¥6",
-        "咖啡¥22",
-        "教材¥45"
+        "早餐煎饼¥7",
+        "食堂午饭¥12",
+        "地铁¥4",
+        "瑞幸咖啡¥15",
+        "外卖晚饭¥32",
+        "教材¥45",
+        "水果¥8",
+        "公交¥3"
       ],
       "catTotals": {
-        "necessary": 24,
-        "optimizable": 22,
+        "necessary": 34,
+        "optimizable": 47,
         "impulsive": 0,
         "learning": 45
       },
       "overBudget": true,
-      "overAmount": 7
+      "overAmount": 6
     },
     {
       "date": "2026-05-04",
-      "total": 84,
+      "total": 98,
       "items": [
-        "食堂¥22",
-        "外卖¥32",
+        "早餐豆浆¥6",
+        "食堂午饭¥14",
+        "奶茶¥20",
         "打车¥18",
-        "零食¥12"
+        "食堂晚饭¥11",
+        "零食¥9",
+        "地铁¥4",
+        "洗衣¥6"
       ],
       "catTotals": {
-        "necessary": 22,
-        "optimizable": 62,
+        "necessary": 41,
+        "optimizable": 47,
         "impulsive": 0,
         "learning": 0
       },
@@ -69,14 +84,18 @@
     },
     {
       "date": "2026-05-05",
-      "total": 61,
+      "total": 71,
       "items": [
-        "食堂¥20",
-        "超市¥35",
-        "地铁¥6"
+        "早餐¥6",
+        "食堂午饭¥12",
+        "地铁¥4",
+        "食堂晚饭¥10",
+        "超市日用品¥28",
+        "水果¥8",
+        "公交¥3"
       ],
       "catTotals": {
-        "necessary": 61,
+        "necessary": 71,
         "optimizable": 0,
         "impulsive": 0,
         "learning": 0
@@ -86,32 +105,39 @@
     },
     {
       "date": "2026-05-06",
-      "total": 91,
+      "total": 121,
       "items": [
-        "外卖¥42",
+        "早餐¥5",
+        "外卖午饭¥28",
         "奶茶¥19",
-        "游戏充值¥30"
+        "外卖晚饭¥32",
+        "游戏充值¥30",
+        "零食¥7"
       ],
       "catTotals": {
-        "necessary": 0,
-        "optimizable": 61,
+        "necessary": 5,
+        "optimizable": 79,
         "impulsive": 30,
         "learning": 0
       },
-      "overBudget": true,
-      "overAmount": 7
+      "overBudget": false,
+      "overAmount": 0
     },
     {
       "date": "2026-05-07",
-      "total": 48,
+      "total": 62,
       "items": [
-        "食堂¥18",
-        "食堂¥16",
+        "早餐包子¥5",
+        "食堂午饭¥13",
+        "地铁¥4",
+        "食堂晚饭¥11",
         "打印资料¥8",
-        "地铁¥6"
+        "公交¥3",
+        "饮用水¥3",
+        "洗衣¥6"
       ],
       "catTotals": {
-        "necessary": 40,
+        "necessary": 45,
         "optimizable": 0,
         "impulsive": 0,
         "learning": 8
@@ -121,33 +147,42 @@
     },
     {
       "date": "2026-05-08",
-      "total": 90,
+      "total": 104,
       "items": [
-        "食堂¥22",
-        "外卖¥28",
+        "早餐¥6",
+        "食堂午饭¥13",
         "咖啡¥18",
-        "打车¥22"
+        "外卖晚饭¥28",
+        "打车¥22",
+        "零食¥8",
+        "地铁¥4",
+        "洗发水¥15"
       ],
       "catTotals": {
-        "necessary": 22,
-        "optimizable": 68,
+        "necessary": 38,
+        "optimizable": 66,
         "impulsive": 0,
         "learning": 0
       },
-      "overBudget": true,
-      "overAmount": 6
+      "overBudget": false,
+      "overAmount": 0
     },
     {
       "date": "2026-05-09",
-      "total": 70,
+      "total": 85,
       "items": [
-        "超市¥48",
-        "地铁¥6",
-        "奶茶¥16"
+        "早餐煎饼¥7",
+        "食堂午饭¥12",
+        "地铁¥4",
+        "奶茶¥16",
+        "食堂晚饭¥10",
+        "超市¥24",
+        "水果¥8",
+        "公交¥3"
       ],
       "catTotals": {
-        "necessary": 54,
-        "optimizable": 16,
+        "necessary": 58,
+        "optimizable": 20,
         "impulsive": 0,
         "learning": 0
       },
@@ -156,50 +191,63 @@
     },
     {
       "date": "2026-05-10",
-      "total": 95,
+      "total": 107,
       "items": [
-        "食堂¥20",
-        "外卖¥45",
-        "零食¥15",
-        "打车¥15"
+        "早餐¥5",
+        "食堂午饭¥14",
+        "奶茶¥20",
+        "外卖晚饭¥35",
+        "地铁¥4",
+        "零食¥12",
+        "纸巾¥8",
+        "洗衣¥6"
       ],
       "catTotals": {
-        "necessary": 20,
-        "optimizable": 75,
+        "necessary": 37,
+        "optimizable": 67,
         "impulsive": 0,
         "learning": 0
+      },
+      "overBudget": false,
+      "overAmount": 0
+    },
+    {
+      "date": "2026-05-11",
+      "total": 142,
+      "items": [
+        "早餐¥6",
+        "食堂午饭¥13",
+        "地铁¥4",
+        "网课报名¥99",
+        "食堂晚饭¥11",
+        "咖啡¥15",
+        "公交¥3"
+      ],
+      "catTotals": {
+        "necessary": 37,
+        "optimizable": 15,
+        "impulsive": 0,
+        "learning": 99
       },
       "overBudget": true,
       "overAmount": 11
     },
     {
-      "date": "2026-05-11",
-      "total": 123,
-      "items": [
-        "食堂¥18",
-        "课程¥99",
-        "地铁¥6"
-      ],
-      "catTotals": {
-        "necessary": 24,
-        "optimizable": 0,
-        "impulsive": 0,
-        "learning": 99
-      },
-      "overBudget": true,
-      "overAmount": 39
-    },
-    {
       "date": "2026-05-12",
-      "total": 75,
+      "total": 88,
       "items": [
-        "食堂¥22",
-        "外卖¥35",
-        "奶茶¥18"
+        "早餐豆浆¥6",
+        "食堂午饭¥12",
+        "地铁¥4",
+        "外卖晚饭¥28",
+        "奶茶¥18",
+        "零食¥8",
+        "洗衣¥6",
+        "水果¥8"
       ],
       "catTotals": {
-        "necessary": 22,
-        "optimizable": 53,
+        "necessary": 36,
+        "optimizable": 46,
         "impulsive": 0,
         "learning": 0
       },
@@ -208,33 +256,41 @@
     },
     {
       "date": "2026-05-13",
-      "total": 113,
+      "total": 128,
       "items": [
-        "食堂¥20",
-        "打车¥25",
-        "零食¥18",
-        "游戏充值¥50"
+        "早餐¥5",
+        "食堂午饭¥13",
+        "打车¥22",
+        "零食¥8",
+        "游戏充值¥50",
+        "食堂晚饭¥10",
+        "奶茶¥18",
+        "公交¥3"
       ],
       "catTotals": {
-        "necessary": 20,
-        "optimizable": 43,
+        "necessary": 31,
+        "optimizable": 48,
         "impulsive": 50,
         "learning": 0
       },
-      "overBudget": true,
-      "overAmount": 29
+      "overBudget": false,
+      "overAmount": 0
     },
     {
       "date": "2026-05-14",
-      "total": 58,
+      "total": 68,
       "items": [
-        "食堂¥18",
-        "超市¥32",
-        "地铁¥8"
+        "早餐包子¥5",
+        "食堂午饭¥14",
+        "地铁¥4",
+        "食堂晚饭¥12",
+        "奶茶¥18",
+        "卫生纸¥8",
+        "水果¥7"
       ],
       "catTotals": {
-        "necessary": 58,
-        "optimizable": 0,
+        "necessary": 50,
+        "optimizable": 18,
         "impulsive": 0,
         "learning": 0
       },
@@ -243,38 +299,53 @@
     },
     {
       "date": "2026-05-15",
-      "total": 94,
+      "total": 103,
       "items": [
-        "食堂¥18",
-        "奶茶¥16",
-        "外卖¥60"
+        "早餐煎饼¥7",
+        "食堂午饭¥13",
+        "地铁¥4",
+        "咖啡¥15",
+        "外卖晚饭¥35",
+        "奶茶¥18",
+        "洗衣¥6",
+        "零食¥8"
       ],
       "catTotals": {
-        "necessary": 18,
-        "optimizable": 76,
+        "necessary": 30,
+        "optimizable": 73,
         "impulsive": 0,
         "learning": 0
       },
-      "overBudget": true,
-      "overAmount": 6
+      "overBudget": false,
+      "overAmount": 0
     },
     {
       "date": "2026-05-16",
-      "total": 269,
+      "total": 50,
       "items": [
-        "食堂¥18",
-        "奶茶¥16",
-        "外卖¥35",
-        "充值游戏¥200"
+        "早餐¥6",
+        "食堂午饭¥14",
+        "外卖晚饭¥30"
       ],
       "catTotals": {
-        "necessary": 18,
-        "optimizable": 51,
-        "impulsive": 200,
+        "necessary": 20,
+        "optimizable": 30,
+        "impulsive": 0,
         "learning": 0
       },
-      "overBudget": true,
-      "overAmount": 126
+      "categories": {
+        "necessary": [
+          "早餐 ¥6",
+          "食堂午饭 ¥14"
+        ],
+        "optimizable": [
+          "外卖晚饭 ¥30"
+        ],
+        "impulsive": [],
+        "learning": []
+      },
+      "overBudget": false,
+      "overAmount": 0
     }
   ]
 }

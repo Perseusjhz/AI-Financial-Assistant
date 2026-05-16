@@ -80,7 +80,7 @@ function ChatOverlay({ open, onClose, accent, accentInk, avatarVariant, onContex
 
       {/* sheet */}
       <div style={{
-        position: 'absolute', left: 10, right: 10, bottom: 90,
+        position: 'absolute', left: 10, right: 10, bottom: 108,
         height: '58%', zIndex: 50,
         borderRadius: 32,
         background: 'rgba(255,255,255,0.62)',

@@ -122,36 +122,14 @@ function PulseNum({ value, pulseKey = 0, ...spanProps }) {
     </span>
   );
 }
-// ─── Buddy avatar — abstract geometric mark ──────────────────────────
-function Buddy({ size = 36, variant = 'geo', accent = '#c8ff3a' }) {
-  if (variant === 'emoji') {
-    return (
-      <div style={{
-        width: size, height: size, borderRadius: '50%',
-        background: '#0a0a0a', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: size * 0.5, flexShrink: 0
-      }}>🐷</div>);
-
-  }
-  if (variant === 'word') {
-    return (
-      <div style={{
-        width: size, height: size, borderRadius: '32%',
-        background: '#0a0a0a', color: '#fff', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-        fontSize: size * 0.45, fontWeight: 900, fontFamily: 'var(--font)',
-        letterSpacing: '-0.05em', flexShrink: 0
-      }}>搭</div>);
-
-  }
-  // geo: two overlapping circles — buddy mark
+// ─── Buddy avatar — uses avatar image ────────────────────────────────
+function Buddy({ size = 36 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0 }}>
-      <circle cx="20" cy="20" r="20" fill="#0a0a0a" />
-      <circle cx="16" cy="17" r="6.5" fill={accent} />
-      <circle cx="24" cy="22" r="6.5" fill="#fff" opacity="0.95" />
-    </svg>);
-
+    <img src="/avatar.png" alt="" style={{
+      width: size, height: size, borderRadius: '50%',
+      objectFit: 'cover', objectPosition: 'center top', flexShrink: 0
+    }}/>
+  );
 }
 
 // ─── Bottom nav (HapiGo-style pill with center FAB) ─────────────────
@@ -198,13 +176,36 @@ function BottomNav({ active, onNav, style = 'fab', accent = '#c8ff3a', chatOpen 
   return (
     <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14, height: 64, zIndex: 60 }}>
       {/* center FAB */}
+      {/* tooltip above FAB */}
+      {!chatOpen && <div style={{
+        position: 'absolute', top: -58, left: 0, right: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        pointerEvents: 'none', zIndex: 3,
+        animation: 'fab-text-bounce 1.8s ease-in-out infinite',
+      }}>
+        <span style={{
+          fontSize: 11, fontWeight: 800, color: '#0a0a0a',
+          background: accent, borderRadius: 10, padding: '4px 10px',
+          whiteSpace: 'nowrap', lineHeight: 1.4,
+        }}>点这里Agent聊天</span>
+        {/* downward arrow */}
+        <div style={{
+          width: 0, height: 0,
+          borderLeft: '5px solid transparent',
+          borderRight: '5px solid transparent',
+          borderTop: `7px solid ${accent}`,
+          marginTop: 0,
+        }} />
+      </div>}
       <button onClick={() => onNav?.('chat')} className="press" style={{
         position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)',
         width: 58, height: 58, borderRadius: '50%',
         background: '#0a0a0a',
         border: '0.5px solid rgba(255,255,255,0.10)',
         color: chatOpen ? '#fff' : accent,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 28px rgba(0,0,0,0.25)',
+        boxShadow: chatOpen
+          ? 'inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 28px rgba(0,0,0,0.25)'
+          : 'inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 28px rgba(0,0,0,0.25), 0 0 18px 4px rgba(200,255,58,0.22)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, cursor: 'pointer',
       }}>
         <div style={{

@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<title>攒钱搭子 AI</title>
+<title>招小财</title>
 <!-- 原版 CSS，一字未改 -->
 <link rel="stylesheet" href="/orig/styles.css"/>
 <style>
@@ -114,6 +114,15 @@ input:focus, textarea:focus {
 }
 @keyframes fade-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 .fade-in { animation:fade-in .3s ease both; }
+@keyframes fab-glow-pulse {
+  0%,100% { opacity:0.55; transform:translateX(-50%) scale(1); }
+  50% { opacity:1; transform:translateX(-50%) scale(1.3); }
+}
+@keyframes fab-text-bounce {
+  0%,100% { transform:translateY(0); }
+  45% { transform:translateY(-4px); }
+  65% { transform:translateY(-2px); }
+}
 </style>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
@@ -201,30 +210,30 @@ function SolidPieChart({ spent, total, accent }) {
 
   return (
     <div style={{
-      margin:'0 18px 20px',
+      margin:'0 18px 16px',
       background:'rgba(255,255,255,0.58)',
       backdropFilter:'blur(32px) saturate(200%)',
       WebkitBackdropFilter:'blur(32px) saturate(200%)',
-      borderRadius:28, padding:'18px 20px 20px',
+      borderRadius:28, padding:'14px 16px 16px',
       border:'0.5px solid rgba(255,255,255,0.85)',
       boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9),0 4px 20px rgba(0,0,0,0.06)',
     }}>
 
       {/* 标题 */}
-      <div style={{marginBottom:16}}>
-        <span style={{fontSize:14,fontWeight:800,color:'#0a0a0a',letterSpacing:'-0.01em'}}>本月余额</span>
+      <div style={{marginBottom:12}}>
+        <span style={{fontSize:13,fontWeight:800,color:'#0a0a0a',letterSpacing:'-0.01em'}}>本月余额</span>
       </div>
 
-      <div style={{display:'flex',alignItems:'center',gap:18}}>
+      <div style={{display:'flex',alignItems:'center',gap:14}}>
 
         {/* ── 3D 旋转饼图 ── */}
         <div style={{
-          flexShrink:0, width:140, height:140,
-          perspective:'600px',
+          flexShrink:0, width:112, height:112,
+          perspective:'480px',
           perspectiveOrigin:'50% 40%',
         }}>
           <div style={{
-            width:140, height:140,
+            width:112, height:112,
             transform:`rotateX(52deg) rotateZ(${angle}deg)`,
             transformStyle:'preserve-3d',
             transformOrigin:'50% 50%',
@@ -237,7 +246,7 @@ function SolidPieChart({ spent, total, accent }) {
                 transform:`translateZ(-${z}px)`,
                 pointerEvents:'none',
               }}>
-                <svg width="140" height="140" viewBox="0 0 140 140">
+                <svg width="112" height="112" viewBox="0 0 140 140">
                   {arcPath(0,usedPct)   && <path d={arcPath(0,usedPct)}   fill={`rgba(6,6,10,${0.7+z*0.025})`}/>}
                   {arcPath(usedPct,1)   && <path d={arcPath(usedPct,1)}   fill={`rgba(160,210,35,${0.55+z*0.02})`}/>}
                 </svg>
@@ -246,7 +255,7 @@ function SolidPieChart({ spent, total, accent }) {
 
             {/* ── 正面 ── */}
             <div style={{position:'absolute',inset:0}}>
-              <svg width="140" height="140" viewBox="0 0 140 140">
+              <svg width="112" height="112" viewBox="0 0 140 140">
                 <defs>
                   <filter id="glw3d" x="-35%" y="-35%" width="170%" height="170%">
                     <feGaussianBlur stdDeviation="5" result="b"/>
@@ -280,23 +289,23 @@ function SolidPieChart({ spent, total, accent }) {
             {dot:accent,    glow:true,  label:'剩余', val:remaining, pct:Math.round(remainPct*100)},
             {dot:'#0d0d11', glow:false, label:'已花', val:spent,     pct:Math.round(usedPct*100)},
           ].map(r=>(
-            <div key={r.label} style={{marginBottom:18}}>
-              <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:3}}>
+            <div key={r.label} style={{marginBottom:14}}>
+              <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
                 <div style={{
-                  width:8,height:8,borderRadius:2,
+                  width:7,height:7,borderRadius:2,
                   background:r.dot,flexShrink:0,
-                  boxShadow:r.glow?`0 0 10px ${r.dot}aa`:'none',
+                  boxShadow:r.glow?`0 0 8px ${r.dot}aa`:'none',
                 }}/>
-                <span style={{fontSize:11,color:'#9a9a96',fontWeight:600,letterSpacing:'0.02em'}}>{r.label}</span>
+                <span style={{fontSize:10.5,color:'#9a9a96',fontWeight:600,letterSpacing:'0.02em'}}>{r.label}</span>
               </div>
-              <div style={{display:'flex',alignItems:'baseline',gap:5,paddingLeft:15}}>
+              <div style={{display:'flex',alignItems:'baseline',gap:4,paddingLeft:13}}>
                 <span className="num" style={{
-                  fontSize:24,fontWeight:900,letterSpacing:'-0.04em',
+                  fontSize:20,fontWeight:900,letterSpacing:'-0.04em',
                   color:overBudget&&r.label==='剩余'?'#e53935':'#0a0a0a',
                 }}>
                   ¥{r.val.toLocaleString('zh-CN')}
                 </span>
-                <span style={{fontSize:11.5,color:'#c0c0bc',fontWeight:700}}>{r.pct}%</span>
+                <span style={{fontSize:10.5,color:'#c0c0bc',fontWeight:700}}>{r.pct}%</span>
               </div>
             </div>
           ))}
@@ -324,7 +333,7 @@ function InteractiveChart({ accent, budget }) {
   const bgt       = chartInfo?.budget ?? budget ?? 84;
 
   // ── SVG math ──────────────────────────────────────────────────
-  const W=320, H=150, PAD={t:24,r:14,b:30,l:14};
+  const W=320, H=120, PAD={t:16,r:12,b:22,l:12};
   const plotW=W-PAD.l-PAD.r, plotH=H-PAD.t-PAD.b;
   const amounts = data.map(d=>d.amount);
   const minV    = amounts.length ? Math.max(0, Math.min(...amounts)*0.6) : 0;
@@ -378,27 +387,27 @@ function InteractiveChart({ accent, budget }) {
 
   return (
     <div style={{
-      margin:'0 18px 20px',
+      margin:'0 18px 14px',
       background:'rgba(255,255,255,0.58)',
       backdropFilter:'blur(32px) saturate(200%)',WebkitBackdropFilter:'blur(32px) saturate(200%)',
-      borderRadius:28,padding:'16px 14px 10px',
+      borderRadius:28,padding:'12px 12px 6px',
       border:'0.5px solid rgba(255,255,255,0.85)',
       boxShadow:'inset 0 1px 0 rgba(255,255,255,0.9),0 4px 20px rgba(0,0,0,0.06)',
     }}>
       {/* header */}
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'0 6px 4px'}}>
-        <div style={{display:'flex',gap:10,alignItems:'baseline'}}>
-          <span style={{fontSize:14,fontWeight:800,color:'#0a0a0a'}}>消费趋势</span>
-          <span style={{fontSize:11,color:'#9a9a96',fontWeight:600}}>{subtitle}</span>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'0 4px 2px'}}>
+        <div style={{display:'flex',gap:8,alignItems:'baseline'}}>
+          <span style={{fontSize:12,fontWeight:800,color:'#0a0a0a'}}>消费趋势</span>
+          <span style={{fontSize:10,color:'#9a9a96',fontWeight:600}}>{subtitle}</span>
         </div>
         {/* period tabs */}
-        <div style={{display:'flex',gap:2,background:'rgba(0,0,0,0.05)',borderRadius:999,padding:3}}>
+        <div style={{display:'flex',gap:2,background:'rgba(0,0,0,0.05)',borderRadius:999,padding:2}}>
           {['week','month','year'].map((p,i)=>{
             const lbl=['周','月','年'][i];
             const on=period===p;
             return(
               <button key={p} onClick={()=>setPeriod(p)} style={{
-                fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,border:0,cursor:'pointer',
+                fontSize:10,fontWeight:700,padding:'3px 9px',borderRadius:999,border:0,cursor:'pointer',
                 background:on?'#0a0a0a':'transparent',
                 color:on?'#fff':'#9a9a96',
                 transition:'all .2s',
@@ -425,7 +434,7 @@ function InteractiveChart({ accent, budget }) {
           <line x1={PAD.l} y1={budgetY} x2={W-PAD.r} y2={budgetY}
             stroke="#c8c8c4" strokeWidth="1" strokeDasharray="4 5"/>
           <text x={W-PAD.r-3} y={budgetY-6} textAnchor="end"
-            fontSize="9.5" fill="#b0b0ac" fontWeight="700">预算 ¥{bgt}</text>
+            fontSize="8" fill="#b0b0ac" fontWeight="700">预算 ¥{bgt}</text>
 
           {/* area fill */}
           {fillD&&<path d={fillD} fill={`url(#${fillId})`}/>}
@@ -452,7 +461,7 @@ function InteractiveChart({ accent, budget }) {
           {/* x-axis labels */}
           {data.map((d,i)=>(
             <text key={i} x={toX(i)} y={H-6} textAnchor="middle"
-              fontSize="9.5" fontWeight="600"
+              fontSize="8" fontWeight="600"
               fill={i>=splitAt?'#c8c8c4':i===tooltip?.idx?'#0a0a0a':'#9a9a96'}>
               {d.label}
             </text>
@@ -482,7 +491,7 @@ function InteractiveChart({ accent, budget }) {
               pointerEvents:'none',
             }}>
               <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:600,marginBottom:2}}>{d.date||d.label}</div>
-              <div className="num" style={{fontSize:20,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>¥{d.amount}</div>
+              <div className="num" style={{fontSize:16,fontWeight:900,color:'#fff',letterSpacing:'-0.04em'}}>¥{d.amount}</div>
               {d.overBudget&&<div style={{fontSize:9.5,color:accent,fontWeight:700,marginTop:2}}>超支 ¥{d.amount-(bgt||0)}</div>}
               {d.items?.length>0&&<div style={{fontSize:9,color:'rgba(255,255,255,0.45)',marginTop:3,lineHeight:1.4}}>
                 {d.items.slice(0,3).join('\n')}
@@ -551,27 +560,30 @@ function EditSheet({open,onClose,fields,values,onChange,onSubmit,loading,accent,
 function HomeScreen({onNav,accent,accentInk,navStyle,chatOpen}){
   const [s,setS]=useState(null);
 
+  function fetchStats(){ fetch('/api/home-stats').then(r=>r.json()).then(setS).catch(()=>{}); }
   useEffect(()=>{
-    // 直接从后端 db 读，不需要传参
-    fetch('/api/home-stats').then(r=>r.json()).then(setS).catch(()=>{});
+    fetchStats();
+    // 当 Agent 更新了数据库时（dataUpdated），自动刷新面板
+    const handler=()=>fetchStats();
+    window.addEventListener('mb-data-updated',handler);
+    return ()=>window.removeEventListener('mb-data-updated',handler);
   },[]);
 
-  const chartData=(s?.chartData)||[
-    {label:'5/10',amount:62},{label:'5/11',amount:88},{label:'5/12',amount:45},
-    {label:'5/13',amount:102},{label:'5/14',amount:71},{label:'5/15',amount:58},
-    {label:'今天',amount:84},{label:'5/17',amount:78},{label:'5/18',amount:78},
-  ];
-  const dailyAvg=s?.dailyAvg||72;
-  const remaining=s?.remainingDays||16;
-  const progress=s?.planProgress||0;
+  // 过滤掉预测点，只保留真实历史数据
+  const rawChart=(s?.chartData||[]);
+  const predCount=s?.predictedCount||0;
+  const chartData=predCount>0?rawChart.slice(0,rawChart.length-predCount):rawChart;
+  const dailyAvg=s?.dailyAvg??null;
+  const remaining=s?.remainingDays??null;
+  const progress=s?.planProgress??0;
 
   return(
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
       <div className="wallpaper"/>
       <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
-        <h1 className="num" style={{margin:'0 22px 4px',fontSize:38,fontWeight:800,letterSpacing:'-0.04em',lineHeight:1.05}}>攒钱总览</h1>
+        <h1 className="num" style={{margin:'0 22px 4px',fontSize:38,fontWeight:800,letterSpacing:'-0.04em',lineHeight:1.05}}>总览</h1>
         <div style={{margin:'0 22px 18px',color:'#9a9a96',fontSize:13,fontWeight:500}}>
-          距离月底还有 <span style={{color:'#0a0a0a',fontWeight:700}}>{remaining} 天</span> · 计划完成 {progress}%
+          距离月底还有 <span style={{color:'#0a0a0a',fontWeight:700}}>{remaining!=null?`${remaining} 天`:'-- 天'}</span> · 计划完成 {progress}%
         </div>
 
         {/* HERO */}
@@ -610,15 +622,15 @@ function HomeScreen({onNav,accent,accentInk,navStyle,chatOpen}){
             <div style={{fontSize:10,letterSpacing:'0.18em',textTransform:'uppercase',color:'rgba(255,255,255,0.5)',fontWeight:700}}>日均消费</div>
 
             <div style={{display:'flex',alignItems:'flex-end',gap:6,margin:'12px 0 14px'}}>
-              <span className="num" style={{fontSize:72,fontWeight:900,lineHeight:0.9}}>{dailyAvg}</span>
-              <span style={{color:'rgba(255,255,255,0.5)',fontSize:18,fontWeight:500,marginBottom:8}}>元/天</span>
+              <span className="num" style={{fontSize:72,fontWeight:900,lineHeight:0.9}}>{dailyAvg??'--'}</span>
+              <span style={{color:'rgba(255,255,255,0.5)',fontSize:18,fontWeight:500,marginBottom:8}}>{dailyAvg!=null?'元/天':''}</span>
             </div>
 
             <div style={{marginTop:18,paddingTop:14,display:'flex',gap:22}}>
               {[
-                {l:'已存',v:s?.saved||0,     u:`/ ${s?.savingGoal||600} 元`},
-                {l:'可花',v:s?.spendable>999?Math.round((s?.spendable||0)/100)/10+'k':s?.spendable||0, u:'本月余额'},
-                {l:'连击',v:s?.streak||0,    u:'天内未超支'},
+                {l:'已存',v:s!=null?s.saved??0:'--',     u:s!=null?`/ ${s.savingGoal||600} 元`:''},
+                {l:'可花',v:s!=null?(s.spendable>999?Math.round((s.spendable||0)/100)/10+'k':s.spendable??0):'--', u:s!=null?'本月余额':''},
+                {l:'连击',v:s!=null?s.streak??0:'--',    u:s!=null?'天内未超支':''},
               ].map(k=>(
                 <div key={k.l}>
                   <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:600,marginBottom:2}}>{k.l.toUpperCase()}</div>
@@ -646,12 +658,13 @@ function HomeScreen({onNav,accent,accentInk,navStyle,chatOpen}){
         {/* QUICK ACTIONS */}
         <div style={{padding:'0 22px 10px',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
           <h2 style={{fontSize:18,fontWeight:800,margin:0,letterSpacing:'-0.02em'}}>今天做什么</h2>
-          <span style={{fontSize:12,color:'#9a9a96',fontWeight:600}}>3 项</span>
+          <span style={{fontSize:12,color:'#9a9a96',fontWeight:600}}>4 项</span>
         </div>
         <div style={{padding:'0 18px 36px',display:'flex',flexDirection:'column',gap:8}}>
           {[
             {tag:'计划',tagBg:accent,tagColor:accentInk,title:'还没复盘今天消费',desc:'记录今天花了多少',to:'review'},
-            {tag:'建议',tagBg:'#0a0a0a',tagColor:'#fff',title:'调整每日预算',desc:`按近期数据重新生成计划`,to:'plan'},
+            {tag:'建议',tagBg:'#0a0a0a',tagColor:'#fff',title:'调整每日预算',desc:'按近期数据重新生成计划',to:'plan'},
+            {tag:'急救',tagBg:'#e53935',tagColor:'#fff',title:'月末急救模式',desc:'钱快不够了？我帮你算',to:'chat'},
             {tag:'学习',tagBg:'#f3f3f1',tagColor:'#0a0a0a',title:'理财风险问答',desc:'不推销 · 只解释风险',to:'risk'},
           ].map(a=>(
             <button key={a.to} onClick={()=>onNav(a.to)} className="press" style={{
@@ -691,12 +704,55 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
   const [editing,setEditing]=useState(false);
   const [loading,setLoading]=useState(false);
   const [err,setErr]=useState('');
+  const [finGuide,setFinGuide]=useState(()=>getLS('mb_finance_guide_v2')||null);
+
+  React.useEffect(()=>{
+    let alive=true;
+    const cached=getLS('mb_finance_guide_v2');
+    fetch('/api/finance-guide').then(r=>r.json()).then(d=>{
+      if(!alive) return;
+      if(!cached||cached.dataVersion!==d.dataVersion){
+        setLS('mb_finance_guide_v2',d);
+        setFinGuide(d);
+      }
+    }).catch(()=>{});
+    return ()=>{alive=false;};
+  },[]);
+
+  // 从后台同步最新预算数据
+  function syncFromDB(){
+    fetch('/api/home-stats').then(r=>r.json()).then(d=>{
+      if(!d.dailyBudget) return;
+      setResult(prev=>{
+        if(!prev) return prev; // 没有计划时不覆盖
+        return {...prev,
+          dailyBudget:d.dailyBudget,
+          weeklyBudget:d.weeklyBudget,
+          monthlySpendable:d.spendable,
+          savingGoal:d.savingGoal||prev.savingGoal,
+          feasibility:d.feasibility||prev.feasibility,
+        };
+      });
+      // 同步 form 里的收入字段（如 agent 更新了奖学金等）
+      const profile=d.profile||{};
+      if(profile.monthlyIncome) setForm(prev=>({...prev,
+        monthlyIncome:String(profile.monthlyIncome),
+        extraIncome:String(profile.extraIncome||0),
+        fixedExpense:String(profile.fixedExpense||prev.fixedExpense||''),
+        savingGoal:String(profile.savingGoal||prev.savingGoal||''),
+      }));
+    }).catch(()=>{});
+  }
+  React.useEffect(()=>{
+    syncFromDB();
+    window.addEventListener('mb-data-updated', syncFromDB);
+    return ()=>window.removeEventListener('mb-data-updated', syncFromDB);
+  },[]);
   const [form,setForm]=useState({
     monthlyIncome:saved?.monthlyIncome||'',
     extraIncome:saved?.extraIncome||'',
     fixedExpense:saved?.fixedExpense||'',
     savingGoal:saved?.savingGoal||'',
-    remainingDays:saved?.remainingDays||String(new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate()-new Date().getDate()),
   });
 
   function updateForm(k,v){setForm(p=>({...p,[k]:v}));}
@@ -707,7 +763,7 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
       const data=await apiPost('/api/saving-plan',{
         monthlyIncome:+form.monthlyIncome,extraIncome:+form.extraIncome||0,
         fixedExpense:+form.fixedExpense,savingGoal:+form.savingGoal,
-        remainingDays:+form.remainingDays,style:planStyle,
+        style:planStyle,
       });
       setResult(data);
       setLS('mb_plan',{...form,style:planStyle,
@@ -725,11 +781,11 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
       <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
         <BackBar title="攒钱计划" onBack={()=>onNav('home')}/>
         <div style={{padding:'0 22px'}}>
-          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>STEP 02 / 03</div>
-          <h1 className="num" style={{margin:'6px 0 4px',fontSize:34,fontWeight:800,letterSpacing:'-0.03em',lineHeight:1.1}}>
-            能存多少，<br/>我帮你算
+          <div style={{fontSize:10,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>STEP 02 / 03</div>
+          <h1 className="num" style={{margin:'4px 0 2px',fontSize:26,fontWeight:800,letterSpacing:'-0.03em',lineHeight:1.1}}>
+            能存多少，我帮你算
           </h1>
-          <p style={{color:'#9a9a96',fontSize:13.5,margin:'8px 0 22px'}}>
+          <p style={{color:'#9a9a96',fontSize:12,margin:'4px 0 14px'}}>
             告诉我你的收入和目标，我会拆成每日预算和可行性评估
           </p>
         </div>
@@ -737,24 +793,24 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
         {/* RESULT BLOCK */}
         {result ? (
           <div className="fade-in" style={{
-            margin:'0 18px 18px',borderRadius:32,padding:'20px 22px 22px',
+            margin:'0 18px 14px',borderRadius:24,padding:'14px 18px 16px',
             background:accent,color:accentInk,position:'relative',overflow:'hidden',
             border:'0.5px solid rgba(255,255,255,0.20)',
-            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.10),0 12px 36px rgba(0,0,0,0.45)',
+            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.28),inset 0 -1px 0 rgba(0,0,0,0.10),0 8px 24px rgba(0,0,0,0.30)',
           }}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-              <div style={{fontSize:10,letterSpacing:'0.18em',fontWeight:800}}>EVERY DAY · 每日预算</div>
-              <span style={{background:'rgba(0,0,0,0.18)',color:'#fff',fontSize:10,fontWeight:800,padding:'4px 9px',borderRadius:999}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{fontSize:9,letterSpacing:'0.18em',fontWeight:800}}>EVERY DAY · 每日预算</div>
+              <span style={{background:'rgba(0,0,0,0.18)',color:'#fff',fontSize:9,fontWeight:800,padding:'3px 8px',borderRadius:999}}>
                 {result.feasibility==='较可行'?'✓ 可行':result.feasibility==='基本可行'?'✓ 基本可行':result.feasibility==='压力较大'?'⚡ 偏紧':'✗ 不可行'}
               </span>
             </div>
-            <div style={{display:'flex',alignItems:'flex-end',gap:8,marginTop:14}}>
-              <span className="num" style={{fontSize:92,fontWeight:900,lineHeight:0.85}}>{result.dailyBudget}</span>
-              <span style={{fontSize:18,fontWeight:600,marginBottom:10}}>元 / 天</span>
+            <div style={{display:'flex',alignItems:'flex-end',gap:6,marginTop:8}}>
+              <span className="num" style={{fontSize:64,fontWeight:900,lineHeight:0.9}}>{result.dailyBudget}</span>
+              <span style={{fontSize:14,fontWeight:600,marginBottom:6}}>元 / 天</span>
             </div>
             <div style={{
-              marginTop:18,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,
-              paddingTop:16,borderTop:'1px solid rgba(0,0,0,0.12)',
+              marginTop:10,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,
+              paddingTop:10,borderTop:'1px solid rgba(0,0,0,0.12)',
             }}>
               {[
                 {l:'每周',v:result.weeklyBudget,u:'元'},
@@ -762,9 +818,9 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
                 {l:'目标',v:result.savingGoal,u:'元'},
               ].map(k=>(
                 <div key={k.l}>
-                  <div style={{fontSize:10,fontWeight:700,opacity:0.55}}>{k.l.toUpperCase()}</div>
-                  <div className="num" style={{fontSize:19,fontWeight:800,marginTop:2}}>
-                    {k.v}<span style={{fontSize:10,opacity:0.55,marginLeft:2}}>{k.u}</span>
+                  <div style={{fontSize:9,fontWeight:700,opacity:0.55}}>{k.l}</div>
+                  <div className="num" style={{fontSize:16,fontWeight:800,marginTop:1}}>
+                    {k.v}<span style={{fontSize:9,opacity:0.55,marginLeft:2}}>{k.u}</span>
                   </div>
                 </div>
               ))}
@@ -795,47 +851,125 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
 
         {/* FORM ROWS */}
         <div style={{padding:'4px 22px 0',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
-          <h2 style={{fontSize:15,fontWeight:800,margin:0}}>计划基础</h2>
+          <h2 style={{fontSize:13,fontWeight:800,margin:0}}>计划基础</h2>
           <span onClick={()=>setEditing(true)} style={{fontSize:11,color:accent,fontWeight:700,cursor:'pointer'}}>
             {result?'点击修改':'点击填写'}
           </span>
         </div>
-        <div style={{padding:'12px 18px',display:'flex',flexDirection:'column',gap:8}}>
+        <div style={{padding:'8px 18px 4px',display:'flex',flexDirection:'column',gap:5}}>
           {[
             {label:'月生活费',key:'monthlyIncome',unit:'元',fb:'未填写'},
             {label:'固定支出',key:'fixedExpense',unit:'元',fb:'未填写'},
             {label:'本月目标',key:'savingGoal',unit:'元 / 月',fb:'未填写'},
-            {label:'剩余天数',key:'remainingDays',unit:'天',fb:'--'},
           ].map(f=>(
             <div key={f.key} onClick={()=>setEditing(true)} style={{
-              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:18,padding:'12px 16px',
-              display:'flex',alignItems:'center',gap:10,cursor:'pointer',
+              background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:14,padding:'8px 14px',
+              display:'flex',alignItems:'center',gap:8,cursor:'pointer',
             }}>
-              <span style={{fontSize:12,color:'#9a9a96',fontWeight:600,width:76}}>{f.label}</span>
-              <span className="num" style={{fontSize:18,fontWeight:800,color:form[f.key]?'#0a0a0a':'#c8c8c4'}}>
+              <span style={{fontSize:11,color:'#9a9a96',fontWeight:600,width:68}}>{f.label}</span>
+              <span className="num" style={{fontSize:15,fontWeight:800,color:form[f.key]?'#0a0a0a':'#c8c8c4'}}>
                 {fv(f.key,f.fb)}
               </span>
-              <span style={{fontSize:11,color:'#9a9a96',fontWeight:500,flex:1}}>{form[f.key]?f.unit:''}</span>
-              <Icon.Chevron size={14} color="#c8c8c4"/>
+              <span style={{fontSize:10,color:'#9a9a96',fontWeight:500,flex:1}}>{form[f.key]?f.unit:''}</span>
+              <Icon.Chevron size={12} color="#c8c8c4"/>
             </div>
           ))}
         </div>
 
-        {/* STYLE PICKER */}
-        <div style={{padding:'12px 22px 0',fontSize:15,fontWeight:800}}>风格</div>
-        <div style={{padding:'10px 18px 24px',display:'flex',gap:8}}>
-          {[{id:'strict',label:'严格',sub:'更激进'},{id:'balanced',label:'平衡',sub:'推荐'},{id:'relaxed',label:'宽松',sub:'更友好'}].map(o=>(
-            <button key={o.id} className="press" onClick={()=>setPlanStyle(o.id)} style={{
-              flex:1,border:0,cursor:'pointer',
-              background:planStyle===o.id?'#0a0a0a':'rgba(255,255,255,0.60)',
-              color:planStyle===o.id?'#fff':'#0a0a0a',
-              borderRadius:16,padding:'14px 8px',
-              display:'flex',flexDirection:'column',gap:4,alignItems:'center',
-            }}>
-              <span style={{fontSize:14,fontWeight:800}}>{o.label}</span>
-              <span style={{fontSize:10,opacity:0.6,fontWeight:600}}>{o.sub}</span>
-            </button>
-          ))}
+        {/* BUDGET FORECAST CHART */}
+        <div style={{padding:'16px 22px 6px',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+          <h2 style={{fontSize:13,fontWeight:800,margin:0}}>月底预测</h2>
+          <span style={{fontSize:10,color:'#9a9a96',fontWeight:600}}>按当前节奏推算</span>
+        </div>
+        <div style={{margin:'0 18px 4px',background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',borderRadius:18,padding:'14px 14px 8px',overflow:'hidden'}}>
+          {finGuide?.chartPoints?.length?(
+            (()=>{
+              const pts=finGuide.chartPoints;
+              const W=320,H=120,PL=4,PR=52,PT=12,PB=20;
+              const plotW=W-PL-PR,plotH=H-PT-PB;
+              const maxV=Math.max(...pts.map(p=>p.remaining),1);
+              const toX=i=>PL+i/(pts.length-1)*plotW;
+              const toY=v=>PT+plotH-(v/maxV)*plotH;
+              const baseY=toY(0);
+              function sp(arr){
+                if(arr.length<2)return '';
+                let d=`M${arr[0].x.toFixed(1)},${arr[0].y.toFixed(1)}`;
+                for(let i=1;i<arr.length;i++){
+                  const p0=arr[Math.max(0,i-2)],p1=arr[i-1],p2=arr[i],p3=arr[Math.min(arr.length-1,i+1)];
+                  const c1x=p1.x+(p2.x-p0.x)/6,c1y=p1.y+(p2.y-p0.y)/6;
+                  const c2x=p2.x-(p3.x-p1.x)/6,c2y=p2.y-(p3.y-p1.y)/6;
+                  d+=` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+                }
+                return d;
+              }
+              const mapped=pts.map((p,i)=>({...p,x:toX(i),y:toY(p.remaining)}));
+              const splitIdx=mapped.findIndex(p=>p.isProjected);
+              const actualPts=splitIdx>0?mapped.slice(0,splitIdx+1):mapped;
+              const projPts=splitIdx>0?mapped.slice(splitIdx):[];
+              const fullLine=sp(mapped);
+              const areaD=`${fullLine} L${mapped[mapped.length-1].x.toFixed(1)},${baseY} L${mapped[0].x.toFixed(1)},${baseY} Z`;
+              const last=mapped[mapped.length-1];
+              const todayPt=splitIdx>0?mapped[splitIdx-1]:null;
+              return(
+                <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{display:'block'}}>
+                  <defs>
+                    <linearGradient id="bgFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#9ab832" stopOpacity="0.40"/>
+                      <stop offset="100%" stopColor="#9ab832" stopOpacity="0.04"/>
+                    </linearGradient>
+                  </defs>
+                  <path d={areaD} fill="url(#bgFill)"/>
+                  {actualPts.length>1&&<path d={sp(actualPts)} fill="none" stroke="#0a0a0a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>}
+                  {projPts.length>1&&<path d={sp(projPts)} fill="none" stroke="#0a0a0a" strokeWidth="2" strokeDasharray="5 3" strokeLinecap="round" strokeLinejoin="round" opacity="0.45"/>}
+                  <line x1={PL} y1={baseY} x2={W-PR+4} y2={baseY} stroke="rgba(0,0,0,0.10)" strokeWidth="1"/>
+                  {todayPt&&<line x1={todayPt.x} y1={PT} x2={todayPt.x} y2={baseY} stroke="rgba(0,0,0,0.12)" strokeWidth="1" strokeDasharray="2 2"/>}
+                  {todayPt&&<text x={todayPt.x} y={PT+8} fontSize="7" fill="rgba(0,0,0,0.30)" textAnchor="middle">今日</text>}
+                  <circle cx={last.x} cy={last.y} r="4.5" fill="#0a0a0a" stroke="#fff" strokeWidth="1.5"/>
+                  <text x={last.x+8} y={last.y+4} fontSize="10.5" fontWeight="800" fill="#0a0a0a">¥{finGuide.projectedEndBalance}</text>
+                  <text x={PL} y={H-4} fontSize="7.5" fill="rgba(0,0,0,0.28)">1日</text>
+                  <text x={W-PR-2} y={H-4} fontSize="7.5" fill="rgba(0,0,0,0.28)" textAnchor="end">{finGuide.lastDay}日</text>
+                </svg>
+              );
+            })()
+          ):(
+            <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,color:'#9a9a96'}}>先填写计划基础</div>
+          )}
+        </div>
+
+        {/* INVESTMENT ADVICE — buddy bubble style */}
+        <div style={{padding:'16px 22px 6px',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+          <h2 style={{fontSize:13,fontWeight:800,margin:0}}>资产配置建议</h2>
+          <span style={{fontSize:10,color:'#9a9a96',fontWeight:600}}>AI · 不涉及具体产品</span>
+        </div>
+        <div style={{padding:'4px 18px 12px'}}>
+          {finGuide?.advice?.length?(
+            <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+              {/* avatar — aligned to top */}
+              <Buddy size={34}/>
+              {/* bubbles column */}
+              <div style={{display:'flex',flexDirection:'column',gap:6,flex:1}}>
+                {finGuide.advice.map((a,i)=>(
+                  <div key={i} style={{
+                    background:'rgba(154,184,50,0.22)',
+                    borderRadius: i===0 ? '4px 18px 18px 18px' : '18px 18px 18px 4px',
+                    padding:'10px 13px',
+                    boxShadow:'0 2px 8px rgba(0,0,0,0.06)',
+                  }}>
+                    <div style={{fontSize:12.5,fontWeight:800,color:'#0a0a0a',marginBottom:3}}>{a.title}</div>
+                    <div style={{fontSize:11.5,color:'#0a0a0a',lineHeight:1.6,opacity:0.75}}>{a.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ):(
+            <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+              <Buddy size={34}/>
+              <div style={{
+                background:'rgba(154,184,50,0.22)',borderRadius:'4px 18px 18px 18px',
+                padding:'10px 13px',fontSize:12,color:'#0a0a0a',
+              }}>先填写计划基础，我来帮你分析~</div>
+            </div>
+          )}
         </div>
 
         {/* NEXT ACTION BANNER */}
@@ -870,7 +1004,6 @@ function PlanScreen({onNav,accent,accentInk,navStyle,chatOpen}){
           {key:'extraIncome',label:'兼职/奖学金',placeholder:'没有填 0',unit:'元'},
           {key:'fixedExpense',label:'固定支出',placeholder:'房租+话费等',unit:'元'},
           {key:'savingGoal',label:'攒钱目标',placeholder:'例：600',unit:'元'},
-          {key:'remainingDays',label:'剩余天数',placeholder:'本月剩余',unit:'天'},
         ]}
         values={form} onChange={updateForm}
         onSubmit={submit} loading={loading}
@@ -893,6 +1026,19 @@ function ReviewScreen({onNav,accent,accentInk,navStyle,chatOpen}){
   const [result,setResult]=useState(null);
   const [loading,setLoading]=useState(false);
   const [err,setErr]=useState('');
+  const [histAnalysis,setHistAnalysis]=useState(null);
+  const [histLoading,setHistLoading]=useState(true);
+
+  // 自动加载往期AI分析（日历自己加载月数据）
+  useEffect(()=>{
+    setHistLoading(true);
+    apiPost('/api/chat',{message:'帮我复盘最近14天的消费情况'})
+      .then(d=>{
+        if(d?.card?.type==='spending_analysis_card'||d?.intent==='spending_analysis') setHistAnalysis(d);
+        setHistLoading(false);
+      })
+      .catch(()=>setHistLoading(false));
+  },[]);
 
   async function submit(){
     if(!text.trim())return;
@@ -913,168 +1059,558 @@ function ReviewScreen({onNav,accent,accentInk,navStyle,chatOpen}){
     {key:'opt',tag:'可优化',amount:result.catTotals.optimizable,items:result.categories.optimizable,tone:'soft'},
     {key:'imp',tag:'冲动',amount:result.catTotals.impulsive,items:result.categories.impulsive,tone:'accent'},
     {key:'learn',tag:'学习',amount:result.catTotals.learning,items:result.categories.learning,tone:'dark'},
-  ]:[
-    {key:'nec',tag:'必要',amount:18,items:['食堂 ¥18'],tone:'gray'},
-    {key:'opt',tag:'可优化',amount:51,items:['奶茶 ¥16','外卖 ¥35'],tone:'soft'},
-    {key:'imp',tag:'冲动',amount:22,items:['打车 ¥22'],tone:'accent'},
-    {key:'learn',tag:'学习',amount:8,items:['打印资料 ¥8'],tone:'dark'},
-  ]).filter(c=>c.amount>0||c.items.length>0);
+  ]:[]).filter(c=>c.amount>0||c.items.length>0);
 
-  const total=result?.total||cats.reduce((s,c)=>s+c.amount,0);
+  const total=result?.total||0;
   const budget=plan?.dailyBudget||84;
+
+
 
   return(
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
       <div className="wallpaper"/>
       <div className="app-scroll" style={{flex:1,overflowY:'auto',overflowX:'hidden',paddingTop:24,position:'relative',zIndex:1}}>
-        <BackBar title="今日复盘" onBack={()=>onNav('home')}/>
-        <div style={{padding:'0 22px 4px'}}>
-          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>{today}</div>
-          <h1 className="num" style={{margin:'4px 0 0',fontSize:30,fontWeight:800,letterSpacing:'-0.03em'}}>复盘一下今天</h1>
+        <BackBar title="消费复盘" onBack={()=>onNav('home')}/>
+
+        {/* ══ 往期消费分析（AI自动生成）══ */}
+        <div style={{padding:'16px 22px 6px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <span style={{fontSize:13,fontWeight:800}}>往期消费分析</span>
+          <span style={{fontSize:10,color:'#9a9a96',fontWeight:600}}>Generating, 14days</span>
         </div>
 
-        {/* TOTAL HERO */}
+        {histLoading?(
+          <div style={{margin:'0 18px 8px',padding:'20px',borderRadius:16,
+            background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',
+            display:'flex',alignItems:'center',justifyContent:'center',gap:8,
+          }}>
+            {[0,1,2].map(i=><span key={i} style={{width:6,height:6,borderRadius:999,background:'#9a9a96',animation:`mb-bounce 1.2s ${i*150}ms infinite ease-in-out`}}/>)}
+            <span style={{fontSize:12,color:'#9a9a96',fontWeight:600}}>正在分析中…</span>
+          </div>
+        ):histAnalysis?(()=>{
+          const c=histAnalysis.card;
+          const reply=histAnalysis.reply;
+          const CATS=[
+            {k:'necessary',  l:'必要',  color:'#0a0a0a'},
+            {k:'optimizable',l:'可优化',color:'#3a3a38'},
+            {k:'impulsive',  l:'冲动',  color:accent},
+            {k:'learning',   l:'学习',  color:'#9a9a96'},
+          ];
+          const totalCat=Object.values(c?.catTotals||{}).reduce((s,v)=>s+v,0)||1;
+          return(
+            <div style={{padding:'0 18px',display:'flex',flexDirection:'column',gap:8}}>
+
+              {/* 消费结构 + 三项统计 — 左右布局 */}
+              {c&&(
+                <div style={{background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',borderRadius:16,padding:'14px',border:'0.5px solid rgba(0,0,0,0.04)',display:'flex',gap:12,alignItems:'stretch'}}>
+
+                  {/* 左：横向柱状图 */}
+                  <div style={{flex:1,display:'flex',flexDirection:'column',gap:9}}>
+                    <div style={{fontSize:10,fontWeight:800,color:'#9a9a96',letterSpacing:'0.08em',marginBottom:2}}>消费结构</div>
+                    {CATS.map(ct=>{
+                      const amt=c.catTotals?.[ct.k]||0;
+                      const pct=Math.round(amt/totalCat*100);
+                      const barColor=ct.k==='necessary'?'#0a0a0a':ct.k==='optimizable'?'rgba(10,10,14,0.30)':ct.k==='impulsive'?accent:'rgba(10,10,14,0.18)';
+                      return(
+                        <div key={ct.k}>
+                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:4}}>
+                            <span style={{fontSize:10,fontWeight:700,color:'#3a3a38'}}>{ct.l}</span>
+                            <span className="num" style={{fontSize:11,fontWeight:900,color:'#0a0a0a'}}>¥{amt} <span style={{fontSize:9,color:'#9a9a96',fontWeight:600}}>{pct}%</span></span>
+                          </div>
+                          <div style={{height:6,borderRadius:999,background:'rgba(0,0,0,0.06)',overflow:'hidden'}}>
+                            <div style={{width:`${pct}%`,height:'100%',borderRadius:999,background:barColor}}/>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* 分隔线 */}
+                  <div style={{width:1,background:'rgba(0,0,0,0.07)',alignSelf:'stretch',flexShrink:0}}/>
+
+                  {/* 右：三项统计竖排 */}
+                  <div style={{width:82,display:'flex',flexDirection:'column',gap:6}}>
+                    {[
+                      {l:'总支出',v:`¥${c.totalSpent??'--'}`,red:false},
+                      {l:'日均',  v:`¥${c.dailyAvg??'--'}`,  red:false},
+                      {l:'超预算',v:`${c.daysOver??0}天`,     red:(c.daysOver??0)>0},
+                    ].map(s=>(
+                      <div key={s.l} style={{
+                        background:'rgba(0,0,0,0.04)',borderRadius:10,
+                        padding:'8px 10px',flex:1,
+                        display:'flex',flexDirection:'column',justifyContent:'center',
+                      }}>
+                        <div style={{fontSize:9,color:'#9a9a96',fontWeight:700,letterSpacing:'0.04em',marginBottom:3}}>{s.l}</div>
+                        <div className="num" style={{fontSize:15,fontWeight:900,color:s.red?'#e53935':'#0a0a0a',lineHeight:1.1}}>{s.v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 主要可优化支出 */}
+              {c?.topItems?.length>0&&(
+                <div style={{background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',borderRadius:16,padding:'12px 14px',border:'0.5px solid rgba(0,0,0,0.04)'}}>
+                  <div style={{fontSize:11,fontWeight:800,color:'#9a9a96',marginBottom:8,letterSpacing:'0.06em'}}>最值得优化的支出</div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                    {c.topItems.map((item,i)=>(
+                      <div key={i} style={{
+                        padding:'5px 10px',borderRadius:999,
+                        background:i===0?'#0a0a0a':'rgba(0,0,0,0.07)',
+                        color:i===0?'#fff':'#3a3a38',fontSize:11.5,fontWeight:700,
+                      }}>{item}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* AI 洞察文字 */}
+              {reply&&(
+                <div style={{display:'flex',gap:8,alignItems:'flex-start'}}>
+                  <Buddy size={24} accent={accent}/>
+                  <div style={{
+                    background:'rgba(16,16,20,0.80)',backdropFilter:'blur(36px)',WebkitBackdropFilter:'blur(36px)',
+                    color:'#fff',borderRadius:'4px 16px 16px 16px',
+                    border:'0.5px solid rgba(255,255,255,0.10)',
+                    padding:'10px 12px',fontSize:12,lineHeight:1.55,flex:1,
+                  }}>
+                    {reply}
+                    {histAnalysis.card?.nextAction&&(
+                      <div style={{marginTop:8,paddingTop:8,borderTop:'1px solid rgba(255,255,255,0.10)',fontSize:10.5,color:accent,fontWeight:700}}>
+                        下周行动：{histAnalysis.card.nextAction}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* AI 洞察列表 */}
+              {c?.insights?.length>0&&(
+                <div style={{background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',borderRadius:16,padding:'12px 14px',border:'0.5px solid rgba(0,0,0,0.04)'}}>
+                  <div style={{fontSize:11,fontWeight:800,color:'#9a9a96',marginBottom:8,letterSpacing:'0.06em'}}>数据洞察</div>
+                  {c.insights.map((ins,i)=>(
+                    <div key={i} style={{display:'flex',gap:8,alignItems:'flex-start',marginBottom:i<c.insights.length-1?6:0}}>
+                      <span style={{fontSize:9,fontWeight:800,color:accent,marginTop:3,flexShrink:0}}>▲</span>
+                      <span style={{fontSize:11.5,color:'#3a3a38',lineHeight:1.5}}>{ins}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })():(
+          <div style={{margin:'0 18px 8px',padding:'14px',borderRadius:16,
+            background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',
+            border:'1.5px dashed rgba(0,0,0,0.08)',textAlign:'center',
+          }}>
+            <div style={{fontSize:12,color:'#9a9a96'}}>暂无往期数据，记录几天消费后自动分析</div>
+          </div>
+        )}
+        <div style={{padding:'0 22px 2px'}}>
+          <div style={{fontSize:11,color:'#9a9a96',fontWeight:700,letterSpacing:'0.12em'}}>{today}</div>
+          <h1 className="num" style={{margin:'2px 0 0',fontSize:26,fontWeight:800,letterSpacing:'-0.03em'}}>复盘一下今天</h1>
+        </div>
+
+        {/* ── 今日记录入口 CTA ── */}
+        {!result&&(
+          <div style={{padding:'14px 18px 0'}}>
+            <button onClick={()=>setInputOpen(true)} className="press" style={{
+              width:'100%',border:0,borderRadius:22,padding:'16px 20px',cursor:'pointer',
+              background:'#0a0a0a',color:'#fff',
+              display:'flex',alignItems:'center',justifyContent:'center',gap:10,
+              boxShadow:'0 6px 24px rgba(0,0,0,0.22)',
+            }}>
+              <Icon.Plus size={18} color="#fff"/>
+              <span style={{fontSize:15,fontWeight:800,letterSpacing:'-0.01em'}}>记录今日消费</span>
+            </button>
+          </div>
+        )}
+
+        {/* ── 今日结果卡（压缩版）── */}
+        {result&&(
         <div style={{
-          margin:'18px 18px 16px',borderRadius:28,padding:'20px 22px 22px',
+          margin:'12px 18px 0',borderRadius:22,padding:'14px 18px 16px',
           background:'rgba(16,16,20,0.80)',
           backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
           border:'0.5px solid rgba(255,255,255,0.14)',
-          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 12px 40px rgba(0,0,0,0.32)',
-          color:'#fff',position:'relative',overflow:'hidden',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 8px 28px rgba(0,0,0,0.28)',
+          color:'#fff',
         }}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-            <div style={{fontSize:10,letterSpacing:'0.18em',fontWeight:800,color:'rgba(255,255,255,0.5)'}}>TODAY · 总支出</div>
-            {result ? (
-              result.overBudget
-                ? <span style={{background:accent,color:accentInk,fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999,display:'inline-flex',alignItems:'center',gap:3}}>
+          {/* 顶行 */}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+            <div style={{display:'flex',alignItems:'baseline',gap:6}}>
+              <span className="num" style={{fontSize:52,fontWeight:900,lineHeight:1}}>{total}</span>
+              <span style={{fontSize:15,color:'rgba(255,255,255,0.5)',fontWeight:500}}>元</span>
+            </div>
+            <div style={{textAlign:'right'}}>
+              {result.overBudget
+                ? <div style={{background:accent,color:accentInk,fontSize:11,fontWeight:800,padding:'4px 10px',borderRadius:999,display:'inline-flex',alignItems:'center',gap:3}}>
                     <Icon.ArrowUp size={10} color={accentInk}/> 超支 ¥{result.overAmount}
-                  </span>
-                : <span style={{background:'#16b86c',color:'#fff',fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999}}>✓ 未超支</span>
-            ) : (
-              <span style={{background:accent,color:accentInk,fontSize:11,fontWeight:800,padding:'4px 9px',borderRadius:999,display:'inline-flex',alignItems:'center',gap:3}}>
-                <Icon.ArrowUp size={10} color={accentInk}/> 超支 ¥{total-budget}
-              </span>
-            )}
+                  </div>
+                : <div style={{background:'#16b86c',color:'#fff',fontSize:11,fontWeight:800,padding:'4px 10px',borderRadius:999}}>✓ 未超支</div>
+              }
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',marginTop:4}}>预算¥{budget} · 用掉{Math.min(999,Math.round(total/budget*100))}%</div>
+            </div>
           </div>
-          <div style={{display:'flex',alignItems:'flex-end',gap:6,marginTop:12}}>
-            <span className="num" style={{fontSize:80,fontWeight:900,lineHeight:0.85}}>{total}</span>
-            <span style={{fontSize:18,color:'rgba(255,255,255,0.5)',fontWeight:500,marginBottom:8}}>元</span>
-          </div>
-          <div style={{marginTop:6,fontSize:12,color:'rgba(255,255,255,0.60)'}}>
-            预算 ¥{budget} · 用掉 <b style={{color:'#fff',fontWeight:800}}>{Math.min(999,Math.round(total/budget*100))}%</b>
-          </div>
-          {/* STACKED BAR */}
-          <div style={{height:8,background:'rgba(0,0,0,0.06)',borderRadius:999,marginTop:16,display:'flex',overflow:'hidden',gap:2}}>
+          {/* 堆叠条 */}
+          <div style={{height:6,background:'rgba(255,255,255,0.08)',borderRadius:999,display:'flex',overflow:'hidden',gap:1,marginBottom:8}}>
             {cats.map(c=>{
-              const fill=c.key==='nec'?'rgba(255,255,255,0.92)':c.key==='opt'?'rgba(255,255,255,0.60)':c.key==='imp'?accent:'rgba(255,255,255,0.25)';
-              return <div key={c.key} style={{width:`${c.amount/total*100}%`,background:fill}}/>;
+              const fill=c.key==='nec'?'rgba(255,255,255,0.88)':c.key==='opt'?'rgba(255,255,255,0.55)':c.key==='imp'?accent:'rgba(255,255,255,0.22)';
+              return total>0&&<div key={c.key} style={{width:`${c.amount/total*100}%`,background:fill}}/>;
             })}
           </div>
-          <div style={{display:'flex',justifyContent:'space-between',marginTop:10}}>
+          {/* 分类小标签行 */}
+          <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
             {cats.map(c=>{
-              const fill=c.key==='nec'?'rgba(255,255,255,0.92)':c.key==='opt'?'rgba(255,255,255,0.60)':c.key==='imp'?accent:'rgba(255,255,255,0.25)';
+              const fill=c.key==='nec'?'rgba(255,255,255,0.88)':c.key==='opt'?'rgba(255,255,255,0.55)':c.key==='imp'?accent:'rgba(255,255,255,0.22)';
               return(
-                <div key={c.key} style={{fontSize:10,color:'#7a7a78',fontWeight:600,display:'flex',alignItems:'center',gap:4}}>
-                  <span style={{width:6,height:6,borderRadius:999,background:fill}}/>
-                  {c.tag} <span style={{color:'rgba(255,255,255,0.85)',fontWeight:800}}>¥{c.amount}</span>
+                <div key={c.key} style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{width:5,height:5,borderRadius:999,background:fill,flexShrink:0}}/>
+                  <span style={{fontSize:10,color:'rgba(255,255,255,0.55)',fontWeight:600}}>{c.tag}</span>
+                  <span style={{fontSize:10,color:'rgba(255,255,255,0.85)',fontWeight:800}}>¥{c.amount}</span>
                 </div>
               );
             })}
           </div>
         </div>
+        )}
 
-        {/* AI INSIGHT */}
-        {result?.reply && (
-          <div style={{margin:'0 18px 16px',display:'flex',gap:10,alignItems:'flex-start'}}>
-            <Buddy size={28} accent={accent}/>
+        {/* ── AI 洞察 ── */}
+        {result?.reply&&(
+          <div style={{margin:'10px 18px 0',display:'flex',gap:8,alignItems:'flex-start'}}>
+            <Buddy size={24} accent={accent}/>
             <div style={{
               background:'rgba(20,20,24,0.82)',backdropFilter:'blur(36px) saturate(200%)',WebkitBackdropFilter:'blur(36px) saturate(200%)',
-              color:'#fff',borderRadius:'4px 18px 18px 18px',
+              color:'#fff',borderRadius:'4px 16px 16px 16px',
               border:'0.5px solid rgba(255,255,255,0.10)',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 8px 22px rgba(0,0,0,0.20)',
-              padding:'12px 14px',fontSize:13.5,lineHeight:1.55,flex:1,
+              padding:'10px 12px',fontSize:12.5,lineHeight:1.5,flex:1,
             }}>
               {result.reply}
-              <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid rgba(255,255,255,0.12)',
-                fontSize:11,color:'rgba(255,255,255,0.5)',display:'flex',justifyContent:'space-between'}}>
-                <span>明日预算 · ¥{budget}</span>
-                <span style={{color:accent,fontWeight:700}}>{result.nextAction}</span>
-              </div>
+              {result.nextAction&&<div style={{marginTop:8,paddingTop:8,borderTop:'1px solid rgba(255,255,255,0.10)',
+                fontSize:10.5,color:accent,fontWeight:700}}>{result.nextAction}</div>}
             </div>
           </div>
         )}
 
-        {/* CATEGORY LIST */}
-        <div style={{padding:'4px 22px',display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
-          <h2 style={{fontSize:15,fontWeight:800,margin:0}}>消费明细</h2>
-          <span onClick={()=>setInputOpen(true)} style={{fontSize:11,color:accent,fontWeight:700,cursor:'pointer'}}>
-            {result?'重新输入':'输入今日消费'}
-          </span>
-        </div>
-        <div style={{padding:'10px 18px 30px',display:'flex',flexDirection:'column',gap:8}}>
-          {cats.map(c=>{
-            const tile=c.tone==='accent'?{bg:accent,fg:accentInk}:c.tone==='dark'?{bg:'#2e2e2e',fg:'#fff'}:c.tone==='soft'?{bg:'#e7e7e3',fg:'#0a0a0a'}:{bg:'#f3f3f1',fg:'#0a0a0a'};
-            return(
-              <div key={c.key} style={{
-                background:'rgba(255,255,255,0.60)',backdropFilter:'blur(32px) saturate(200%)',WebkitBackdropFilter:'blur(32px) saturate(200%)',
-                borderRadius:20,padding:'14px 16px',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8),0 4px 18px rgba(0,0,0,0.05)',
-                border:'0.5px solid rgba(0,0,0,0.04)',display:'flex',alignItems:'center',gap:14,
-              }}>
-                <div style={{width:44,height:44,borderRadius:14,background:tile.bg,color:tile.fg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:800}}>{c.tag}</div>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
-                    <span style={{fontSize:13,fontWeight:800}}>{c.tag}消费</span>
-                    <span className="num" style={{fontSize:18,fontWeight:800}}>¥{c.amount}</span>
+        {/* ── 消费明细（压缩）── */}
+        {cats.length>0&&(
+        <>
+          <div style={{padding:'14px 22px 6px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontSize:13,fontWeight:800}}>消费明细</span>
+            <button onClick={()=>setInputOpen(true)} style={{border:0,background:'transparent',fontSize:11,color:'#0a0a0a',fontWeight:700,cursor:'pointer',padding:0}}>重新输入</button>
+          </div>
+          <div style={{padding:'0 18px',display:'flex',flexDirection:'column',gap:6}}>
+            {cats.map(c=>{
+              const tile=c.tone==='accent'?{bg:accent,fg:accentInk}:c.tone==='dark'?{bg:'#2e2e2e',fg:'#fff'}:c.tone==='soft'?{bg:'#e8e8e4',fg:'#0a0a0a'}:{bg:'#f0f0ee',fg:'#0a0a0a'};
+              return(
+                <div key={c.key} style={{
+                  background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',
+                  borderRadius:16,padding:'10px 14px',display:'flex',alignItems:'center',gap:10,
+                  border:'0.5px solid rgba(0,0,0,0.04)',
+                }}>
+                  <div style={{width:34,height:34,borderRadius:10,background:tile.bg,color:tile.fg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:800,flexShrink:0}}>{c.tag}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                      <span style={{fontSize:12.5,fontWeight:800}}>{c.tag}消费</span>
+                      <span className="num" style={{fontSize:16,fontWeight:900}}>¥{c.amount}</span>
+                    </div>
+                    <div style={{fontSize:11,color:'#9a9a96',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.items.join(' · ')||'—'}</div>
                   </div>
-                  <div style={{marginTop:4,fontSize:12,color:'#9a9a96',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.items.join('  ·  ')||'—'}</div>
                 </div>
+              );
+            })}
+          </div>
+        </>
+        )}
+
+        {/* ══ 消费日历（月视图，可点击编辑）══ */}
+        {(()=>{
+          const [editDay,setEditDay]=React.useState(null); // {date,existing}
+          const [editText,setEditText]=React.useState('');
+          const [editLoading,setEditLoading]=React.useState(false);
+          const [calData,setCalData]=React.useState(null);
+          const [calLoaded,setCalLoaded]=React.useState(false);
+
+          // 加载本月数据
+          React.useEffect(()=>{
+            fetch('/api/chart-data?period=month').then(r=>r.json()).then(d=>{
+              setCalData(d); setCalLoaded(true);
+            }).catch(()=>setCalLoaded(true));
+          },[]);
+
+          const todayISO=new Date().toISOString().slice(0,10);
+          const now=new Date();
+          const year=now.getFullYear();
+          const month=now.getMonth(); // 0-indexed
+          const monthStr=`${year}/${String(month+1).padStart(2,'0')}`;
+
+          // 本月所有天 → Map date→record
+          const recordMap={};
+          (calData?.chartData||[]).forEach(r=>{if(r.date)recordMap[r.date]=r;});
+
+          // 计算月统计
+          const monthRecords=Object.values(recordMap);
+          const mTotal=monthRecords.reduce((s,r)=>s+(r.amount||0),0);
+          const mAvg=monthRecords.length?Math.round(mTotal/monthRecords.length):0;
+          const mOver=monthRecords.filter(r=>r.overBudget||(budget>0&&r.amount>budget)).length;
+
+          // 构建日历格子（日一二三四五六）
+          const firstDay=new Date(year,month,1).getDay(); // 0=Sun
+          const daysInMonth=new Date(year,month+1,0).getDate();
+          const cells=[];
+          for(let i=0;i<firstDay;i++) cells.push(null);
+          for(let d=1;d<=daysInMonth;d++) cells.push(d);
+          // 补齐到整行
+          while(cells.length%7!==0) cells.push(null);
+
+          async function saveEdit(){
+            if(!editText.trim()||!editDay)return;
+            setEditLoading(true);
+            try{
+              const r=await apiPost('/api/spending/update',{date:editDay.date,text:editText,dailyBudget:budget});
+              // 更新本地 calData
+              setCalData(prev=>{
+                const arr=(prev?.chartData||[]).filter(x=>x.date!==editDay.date);
+                const d2=new Date(editDay.date+'T00:00:00');
+                arr.push({date:editDay.date,amount:r.total,overBudget:r.overBudget,
+                  label:editDay.date===todayISO?'今天':`${d2.getMonth()+1}/${d2.getDate()}`});
+                arr.sort((a,b)=>a.date.localeCompare(b.date));
+                return {...prev,chartData:arr};
+              });
+              setEditDay(null); setEditText('');
+            }catch(e){alert(e.message);}
+            setEditLoading(false);
+          }
+
+          const WEEK_LABELS=['日','一','二','三','四','五','六'];
+
+          return(
+          <div style={{padding:'0 18px'}}>
+            {/* 标题行 */}
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10,paddingTop:16}}>
+              <span style={{fontSize:13,fontWeight:800}}>消费日历</span>
+              <span style={{fontSize:10,color:'#9a9a96',fontWeight:600}}>{monthStr} · 点日期可编辑</span>
+            </div>
+
+            {/* 月统计 */}
+            {monthRecords.length>0&&(
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:10}}>
+              {[
+                {l:'本月总支出',v:`¥${mTotal}`},
+                {l:'日均消费',  v:`¥${mAvg}`},
+                {l:'超预算天数',v:`${mOver}天`},
+              ].map(s=>(
+                <div key={s.l} style={{background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',borderRadius:14,padding:'10px 8px',textAlign:'center',border:'0.5px solid rgba(0,0,0,0.04)'}}>
+                  <div className="num" style={{fontSize:15,fontWeight:900,color:'#0a0a0a'}}>{s.v}</div>
+                  <div style={{fontSize:9,color:'#9a9a96',marginTop:2,fontWeight:600}}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            )}
+
+            {/* 日历网格 */}
+            <div style={{background:'rgba(255,255,255,0.62)',backdropFilter:'blur(28px)',WebkitBackdropFilter:'blur(28px)',borderRadius:18,padding:'12px 10px',border:'0.5px solid rgba(0,0,0,0.04)'}}>
+              {/* 星期头 */}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',marginBottom:6}}>
+                {WEEK_LABELS.map(l=>(
+                  <div key={l} style={{textAlign:'center',fontSize:10,fontWeight:700,color:'#9a9a96',padding:'2px 0'}}>{l}</div>
+                ))}
               </div>
-            );
-          })}
-          <button onClick={()=>setInputOpen(true)} className="press" style={{
-            border:'1.5px dashed rgba(0,0,0,0.10)',background:'transparent',
-            borderRadius:20,padding:'14px',color:'#9a9a96',
-            display:'flex',alignItems:'center',justifyContent:'center',gap:8,
-            fontSize:13,fontWeight:700,cursor:'pointer',
-          }}>
-            <Icon.Plus size={16} color="#9a9a96"/> 输入今天消费
-          </button>
-        </div>
+              {/* 日期格子 */}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3}}>
+                {cells.map((day,i)=>{
+                  if(!day) return <div key={'e'+i}/>;
+                  const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                  const rec=recordMap[dateStr];
+                  const isFuture=dateStr>todayISO;
+                  const isToday=dateStr===todayISO;
+                  const over=rec&&(rec.overBudget||(budget>0&&rec.amount>budget));
+                  const hasData=!!rec;
+
+                  let bg='transparent',dayColor='#9a9a96',amtColor='transparent',border='none';
+                  if(isFuture){dayColor='#d0d0cc';}
+                  else if(hasData&&over){
+                    bg=accent; dayColor=accentInk; amtColor=accentInk; border='none';
+                  } else if(hasData&&!over){
+                    bg='#0a0a0a'; dayColor='#fff'; amtColor='rgba(255,255,255,0.7)'; border='none';
+                  } else if(isToday){
+                    border=`1.5px solid ${accent}`; dayColor='#0a0a0a';
+                  } else {
+                    dayColor='#6a6a68';
+                  }
+
+                  return(
+                    <div key={dateStr} onClick={()=>{
+                      if(isFuture)return;
+                      setEditDay({date:dateStr,existing:rec?.items?.join('，')||''});
+                      setEditText(rec?.items?.join('，')||'');
+                    }} style={{
+                      borderRadius:8,padding:'5px 2px 4px',textAlign:'center',cursor:isFuture?'default':'pointer',
+                      background:bg,border,boxSizing:'border-box',
+                      minHeight:44,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                    }}>
+                      <div style={{fontSize:12,fontWeight:800,color:dayColor,lineHeight:1}}>{day}</div>
+                      {hasData&&(
+                        <div style={{fontSize:9,fontWeight:700,color:amtColor,marginTop:2,lineHeight:1}}>
+                          ¥{rec.amount}
+                        </div>
+                      )}
+                      {!hasData&&isToday&&(
+                        <div style={{fontSize:8,color:accent,marginTop:2,fontWeight:700}}>今</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 图例 */}
+            <div style={{display:'flex',gap:12,marginTop:8,justifyContent:'flex-end'}}>
+              {[{c:'#0a0a0a',l:'未超支'},{c:accent,l:'超支'},{c:'rgba(0,0,0,0.12)',l:'无记录'}].map(x=>(
+                <div key={x.l} style={{display:'flex',alignItems:'center',gap:4}}>
+                  <span style={{width:8,height:8,borderRadius:2,background:x.c,flexShrink:0,border:x.c==='rgba(0,0,0,0.12)'?'0.5px solid rgba(0,0,0,0.12)':'none'}}/>
+                  <span style={{fontSize:9.5,color:'#9a9a96',fontWeight:600}}>{x.l}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* 编辑弹层 */}
+            {editDay&&(
+            <>
+              <div onClick={()=>{setEditDay(null);setEditText('');}} style={{
+                position:'fixed',inset:0,zIndex:90,background:'rgba(10,10,12,0.25)',
+                backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
+              }}/>
+              <div style={{
+                position:'fixed',bottom:0,left:0,right:0,zIndex:91,
+                background:'rgba(255,255,255,0.96)',backdropFilter:'blur(40px)',WebkitBackdropFilter:'blur(40px)',
+                borderRadius:'24px 24px 0 0',padding:'16px 20px 100px',
+                boxShadow:'0 -8px 40px rgba(0,0,0,0.14)',
+                border:'0.5px solid rgba(255,255,255,0.9)',
+              }}>
+                <div style={{width:38,height:4,borderRadius:999,background:'rgba(0,0,0,0.15)',margin:'0 auto 14px'}}/>
+                <div style={{fontSize:14,fontWeight:800,marginBottom:2}}>
+                  {editDay.date===todayISO?'今天':editDay.date} 的消费
+                </div>
+                <div style={{fontSize:11.5,color:'#9a9a96',marginBottom:10}}>
+                  {editDay.existing?'已有记录，修改后覆盖保存':'还没有记录，现在补上'}
+                </div>
+                <textarea value={editText} onChange={e=>setEditText(e.target.value)}
+                  placeholder="食堂15，奶茶20，地铁4…"
+                  style={{width:'100%',minHeight:72,padding:'10px 12px',borderRadius:12,
+                    border:'0.5px solid rgba(0,0,0,0.10)',background:'rgba(0,0,0,0.04)',
+                    font:'inherit',fontSize:13.5,outline:'none',resize:'none',
+                    boxSizing:'border-box',lineHeight:1.6,color:'#0a0a0a'}}/>
+                <button onClick={saveEdit} disabled={editLoading||!editText.trim()} style={{
+                  width:'100%',marginTop:10,padding:'14px',border:0,borderRadius:16,
+                  background:editLoading||!editText.trim()?'#c8c8c4':'#0a0a0a',
+                  color:'#fff',font:'inherit',fontSize:14,fontWeight:800,cursor:'pointer',
+                  boxShadow:'0 4px 16px rgba(0,0,0,0.18)',
+                }}>{editLoading?'保存中…':'保存'}</button>
+              </div>
+            </>
+            )}
+          </div>
+          );
+        })()}
+
+
         <div style={{height:96}}/>
       </div>
       <BottomNav active="review" onNav={onNav} style={navStyle} accent={accent} chatOpen={chatOpen}/>
 
       {/* INPUT SHEET */}
-      <>
-        <div onClick={()=>{setInputOpen(false);setErr('');}} style={{
-          position:'absolute',inset:0,zIndex:70,
-          background:'rgba(10,10,12,0.20)',
-          backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
-          opacity:inputOpen?1:0,pointerEvents:inputOpen?'auto':'none',transition:'opacity .2s',
-        }}/>
-        <div className={`edit-sheet${inputOpen?'':' hidden'}`} style={{zIndex:80}}>
-          <div className="handle"/>
-          <div style={{fontSize:15,fontWeight:800,marginBottom:6,color:'#0a0a0a'}}>输入今日消费</div>
-          <div style={{fontSize:12,color:'#9a9a96',marginBottom:12}}>用逗号分隔，金额跟在物品后面</div>
-          <textarea value={text} onChange={e=>setText(e.target.value)}
-            placeholder={'例：食堂18，奶茶16，外卖35，打车22，打印资料8'}
-            style={{width:'100%',minHeight:90,padding:'12px 14px',borderRadius:14,border:'0.5px solid rgba(0,0,0,0.10)',
-              background:'rgba(0,0,0,0.04)',font:'inherit',fontSize:14,color:'#0a0a0a',outline:'none',resize:'none',
-              boxSizing:'border-box',lineHeight:1.6}}/>
-          <div style={{display:'flex',flexWrap:'wrap',gap:8,margin:'10px 0 14px'}}>
-            {['食堂18，奶茶16，外卖35','外卖28，咖啡22，地铁4','游戏充值50，食堂20'].map(s=>(
-              <button key={s} onClick={()=>setText(s)} style={{fontSize:11.5,padding:'6px 11px',borderRadius:999,border:'0.5px solid rgba(0,0,0,0.08)',cursor:'pointer',background:'rgba(255,255,255,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',color:'#6a6a68',fontWeight:600}}>{s}</button>
-            ))}
+      {(()=>{
+        const [qCat,setQCat]=React.useState('餐饮');
+        const QCATS={
+          '餐饮':[
+            {n:'食堂',p:15},{n:'外卖',p:30},{n:'奶茶',p:20},{n:'咖啡',p:18},{n:'快餐',p:22},
+            {n:'零食',p:12},{n:'水果',p:10},{n:'牛奶',p:8},{n:'面包',p:8},{n:'饮料',p:6},
+            {n:'火锅',p:80},{n:'烧烤',p:60},{n:'聚餐',p:50},{n:'夜宵',p:30},{n:'早餐',p:10},
+          ],
+          '交通':[
+            {n:'地铁',p:4},{n:'公交',p:2},{n:'打车',p:22},{n:'共享单车',p:2},
+            {n:'高铁',p:80},{n:'出租',p:20},
+          ],
+          '生活':[
+            {n:'超市',p:30},{n:'日用品',p:20},{n:'洗衣',p:8},{n:'理发',p:35},
+            {n:'快递',p:5},{n:'话费',p:30},{n:'水电费',p:50},{n:'网费',p:20},
+            {n:'药',p:20},{n:'医院',p:50},{n:'洗漱用品',p:30},{n:'卫生纸',p:15},
+          ],
+          '学习':[
+            {n:'打印',p:5},{n:'文具',p:10},{n:'教材',p:40},{n:'课程费',p:100},
+            {n:'考试费',p:50},{n:'网课',p:200},{n:'实验材料',p:30},
+          ],
+          '娱乐':[
+            {n:'电影',p:35},{n:'游戏充值',p:30},{n:'KTV',p:80},{n:'演出票',p:150},
+            {n:'美甲',p:80},{n:'健身',p:30},{n:'会员订阅',p:20},{n:'密室',p:100},
+          ],
+        };
+        function addItem(n,p){
+          setText(t=>{
+            const comma=t.trim()&&!t.trim().endsWith('，')?'，':'';
+            return t.trim()+comma+n+p;
+          });
+        }
+        return(
+        <>
+          <div onClick={()=>{setInputOpen(false);setErr('');}} style={{
+            position:'absolute',inset:0,zIndex:70,
+            background:'rgba(10,10,12,0.20)',
+            backdropFilter:'blur(2px)',WebkitBackdropFilter:'blur(2px)',
+            opacity:inputOpen?1:0,pointerEvents:inputOpen?'auto':'none',transition:'opacity .2s',
+          }}/>
+          <div className={`edit-sheet${inputOpen?'':' hidden'}`} style={{zIndex:80,paddingBottom:20}}>
+            <div className="handle"/>
+            <div style={{fontSize:15,fontWeight:800,marginBottom:2,color:'#0a0a0a'}}>记录今日消费</div>
+            <div style={{fontSize:12,color:'#9a9a96',marginBottom:10}}>点击下方快速添加，或直接输入</div>
+
+            {/* 分类 tab */}
+            <div style={{display:'flex',gap:6,marginBottom:8,overflowX:'auto',paddingBottom:2}}>
+              {Object.keys(QCATS).map(cat=>(
+                <button key={cat} onClick={()=>setQCat(cat)} style={{
+                  flexShrink:0,fontSize:11.5,fontWeight:700,padding:'5px 12px',borderRadius:999,
+                  border:qCat===cat?'none':'0.5px solid rgba(0,0,0,0.08)',cursor:'pointer',
+                  background:qCat===cat?'#0a0a0a':'rgba(255,255,255,0.65)',
+                  color:qCat===cat?'#fff':'#6a6a68',
+                  backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
+                }}>{cat}</button>
+              ))}
+            </div>
+
+            {/* 快捷条目 */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:10}}>
+              {(QCATS[qCat]||[]).map(item=>(
+                <button key={item.n} onClick={()=>addItem(item.n,item.p)} style={{
+                  fontSize:12,fontWeight:600,padding:'5px 10px',borderRadius:999,
+                  border:'0.5px solid rgba(0,0,0,0.08)',cursor:'pointer',
+                  background:'rgba(255,255,255,0.72)',backdropFilter:'blur(16px)',WebkitBackdropFilter:'blur(16px)',
+                  color:'#3a3a38',display:'flex',alignItems:'center',gap:4,
+                }}>
+                  {item.n}
+                  <span style={{fontSize:10,color:'#9a9a96',fontWeight:500}}>¥{item.p}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* 文字输入 */}
+            <textarea value={text} onChange={e=>setText(e.target.value)}
+              placeholder={'例：食堂15，奶茶20，地铁4，洗衣8…'}
+              style={{width:'100%',minHeight:72,padding:'10px 12px',borderRadius:14,border:'0.5px solid rgba(0,0,0,0.10)',
+                background:'rgba(0,0,0,0.04)',font:'inherit',fontSize:13.5,color:'#0a0a0a',outline:'none',resize:'none',
+                boxSizing:'border-box',lineHeight:1.6}}/>
+            <div style={{fontSize:10.5,color:'#b0b0ac',marginTop:4,marginBottom:8}}>可直接修改金额，格式：物品+金额，逗号分隔</div>
+
+            {err&&<div style={{padding:'10px 12px',background:'#fff0f0',borderRadius:12,fontSize:12,color:'#c01900',fontWeight:600,marginBottom:10}}>⚠ {err}</div>}
+            <button onClick={submit} disabled={loading||!text.trim()} style={{
+              width:'100%',padding:'14px',border:0,borderRadius:18,
+              background:loading||!text.trim()?'#c8c8c4':'#0a0a0a',color:'#fff',
+              font:'inherit',fontSize:15,fontWeight:800,cursor:'pointer',
+              boxShadow:'0 6px 20px rgba(0,0,0,0.22)',
+            }}>{loading?'分析中…':'开始复盘'}</button>
           </div>
-          {err&&<div style={{padding:'10px 12px',background:'#fff0f0',borderRadius:12,fontSize:12,color:'#c01900',fontWeight:600,marginBottom:12}}>⚠ {err}</div>}
-          <button onClick={submit} disabled={loading||!text.trim()} style={{
-            width:'100%',padding:'15px',border:0,borderRadius:18,
-            background:loading||!text.trim()?'#c8c8c4':accent,color:loading||!text.trim()?'#fff':accentInk,
-            font:'inherit',fontSize:15,fontWeight:800,cursor:'pointer',
-            boxShadow:'inset 0 1px 0 rgba(255,255,255,0.22),0 6px 20px rgba(0,0,0,0.22)',
-          }}>{loading?'分析中…':'开始复盘'}</button>
-        </div>
-      </>
+        </>
+        );
+      })()}
     </div>
   );
 }
@@ -1214,7 +1750,7 @@ function RiskScreen({onNav,accent,accentInk,navStyle,chatOpen}){
         </div>
 
         <div style={{padding:'4px 22px 0',fontSize:10.5,color:'#bdbdb8',textAlign:'center',lineHeight:1.5}}>
-          🔒 {result?.disclaimer||'本回答仅供理财教育参考，不构成任何投资建议'}
+           {result?.disclaimer||'本回答仅供理财教育参考，不构成任何投资建议'}
         </div>
         <div style={{height:96}}/>
       </div>
@@ -1258,9 +1794,45 @@ function RiskScreen({onNav,accent,accentInk,navStyle,chatOpen}){
 /* ════════════════════════════════════════════════════════════════
    PROFILE SCREEN  — 原版视觉
    ════════════════════════════════════════════════════════════════ */
+/* ─── 财务健康分计算 ─────────────────────────────────────────── */
+function calcHealthScore(plan, review) {
+  let score = 0;
+  const reasons = { good: [], improve: [] };
+  // 预算清晰度 (30分)
+  if (plan?.dailyBudget) { score += 30; reasons.good.push('已设置每日预算'); }
+  else reasons.improve.push('尚未设置预算');
+  // 储蓄目标合理性 (20分)
+  if (plan?.savingGoal && plan?.monthlyIncome) {
+    const ratio = plan.savingGoal / plan.monthlyIncome;
+    if (ratio > 0 && ratio <= 0.4) { score += 20; reasons.good.push('储蓄目标比例合理'); }
+    else if (ratio > 0.4) { score += 8; reasons.improve.push('储蓄目标占比偏高，生活空间紧张'); }
+    else reasons.improve.push('建议设置攒钱目标');
+  } else if (plan?.savingGoal) { score += 10; reasons.good.push('已设置攒钱目标'); }
+  else reasons.improve.push('建议设置攒钱目标');
+  // 复盘连续性 (25分)
+  if (review?.date) {
+    const d = new Date(review.date);
+    const diff = (Date.now() - d.getTime()) / 86400000;
+    if (diff <= 1) { score += 25; reasons.good.push('今天已复盘'); }
+    else if (diff <= 3) { score += 15; reasons.good.push('最近有复盘记录'); }
+    else { score += 5; reasons.improve.push('复盘频率有点低，建议每天记一次'); }
+  } else reasons.improve.push('还没有复盘记录');
+  // 应急金意识 (15分) — 估算（有余额意识）
+  if (plan?.monthlyIncome && plan?.fixedExpense) { score += 15; reasons.good.push('已记录固定支出'); }
+  else reasons.improve.push('应急金意识还不强');
+  // 消费结构 (10分) — 如果最近复盘超支次数少
+  if (review && !review.overBudget) { score += 10; reasons.good.push('最近一次未超支'); }
+  else if (review?.overBudget) { score += 3; reasons.improve.push('可优化消费占比偏高'); }
+  else reasons.improve.push('消费结构数据不足');
+
+  const status = score >= 80 ? '财务习惯稳健' : score >= 60 ? '正在变稳' : score >= 40 ? '需要关注' : '需要改善';
+  return { score: Math.min(100, score), status, reasons };
+}
+
 function ProfileScreen({onNav,accent,accentInk,navStyle,chatOpen}){
   const plan=getLS('mb_plan');
   const review=getLS('mb_lastReview');
+  const health=calcHealthScore(plan,review);
   return(
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
       <div className="wallpaper"/>
@@ -1270,25 +1842,10 @@ function ProfileScreen({onNav,accent,accentInk,navStyle,chatOpen}){
           <h1 className="num" style={{margin:'4px 0 18px',fontSize:34,fontWeight:800,letterSpacing:'-0.03em'}}>我的</h1>
         </div>
 
-        {/* USER CARD */}
-        <div style={{
-          margin:'0 18px 16px',
-          background:'rgba(16,16,20,0.80)',
-          backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
-          border:'0.5px solid rgba(255,255,255,0.14)',
-          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 12px 40px rgba(0,0,0,0.32)',
-          borderRadius:26,padding:'18px',color:'#fff',display:'flex',alignItems:'center',gap:14,
-        }}>
-          <Buddy size={56} accent={accent}/>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:17,fontWeight:800}}>同学</div>
-            <div style={{fontSize:12,color:'rgba(255,255,255,0.60)',marginTop:2}}>本地账户 · 无需登录</div>
-            <div style={{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}}>
-              <span style={{fontSize:10.5,fontWeight:800,padding:'4px 9px',borderRadius:999,background:'rgba(255,255,255,0.12)',color:'#fff'}}>非营销认证</span>
-              {plan&&<span style={{fontSize:10.5,fontWeight:800,padding:'4px 9px',borderRadius:999,background:accent,color:accentInk,display:'inline-flex',alignItems:'center',gap:4}}>
-                <Icon.Flame size={10} color={accentInk}/> 已设置计划
-              </span>}
-            </div>
+        {/* AVATAR */}
+        <div style={{display:'flex',justifyContent:'center',padding:'8px 0 20px'}}>
+          <div style={{width:140,height:140,borderRadius:'50%',overflow:'hidden',flexShrink:0}}>
+            <img src="/avatar.png" alt="" style={{width:'100%',height:'100%',objectFit:'cover',objectPosition:'center top'}}/>
           </div>
         </div>
 
@@ -1303,6 +1860,69 @@ function ProfileScreen({onNav,accent,accentInk,navStyle,chatOpen}){
               <div className="num" style={{fontSize:22,fontWeight:900,letterSpacing:'-0.04em',lineHeight:1}}>{s.v}</div>
               <div style={{fontSize:11,color:'#0a0a0a',fontWeight:700,marginTop:6}}>{s.l}</div>
               <div style={{fontSize:10,color:'#9a9a96',marginTop:1}}>{s.s}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* 财务健康分 */}
+        <div style={{padding:'0 22px 8px',fontSize:16,fontWeight:800}}>财务健康分</div>
+        <div style={{margin:'0 18px 16px',borderRadius:24,overflow:'hidden',
+          background:'rgba(16,16,20,0.80)',backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
+          border:'0.5px solid rgba(255,255,255,0.14)',boxShadow:'inset 0 1px 0 rgba(255,255,255,0.16),0 12px 40px rgba(0,0,0,0.32)',
+          padding:'18px 20px',color:'#fff',
+        }}>
+          <div style={{display:'flex',alignItems:'flex-end',gap:12,marginBottom:14}}>
+            <span className="num" style={{fontSize:64,fontWeight:900,lineHeight:0.9,color:accent}}>{health.score}</span>
+            <div style={{marginBottom:6}}>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.5)',fontWeight:700,letterSpacing:'0.1em'}}>/ 100</div>
+              <div style={{fontSize:13,fontWeight:800,color:'#fff',marginTop:2}}>{health.status}</div>
+            </div>
+          </div>
+          {/* 进度条 */}
+          <div style={{height:6,borderRadius:999,background:'rgba(255,255,255,0.12)',overflow:'hidden',marginBottom:14}}>
+            <div style={{height:'100%',width:`${health.score}%`,background:accent,borderRadius:999}}/>
+          </div>
+          {/* 优势 */}
+          {health.reasons.good.length>0&&(
+            <div style={{marginBottom:8}}>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:700,marginBottom:4}}>优势</div>
+              {health.reasons.good.map((r,i)=>(
+                <div key={i} style={{fontSize:11.5,color:'rgba(255,255,255,0.85)',marginBottom:2}}>✓ {r}</div>
+              ))}
+            </div>
+          )}
+          {/* 需要优化 */}
+          {health.reasons.improve.length>0&&(
+            <div>
+              <div style={{fontSize:10,color:'rgba(255,255,255,0.5)',fontWeight:700,marginBottom:4}}>需要优化</div>
+              {health.reasons.improve.map((r,i)=>(
+                <div key={i} style={{fontSize:11.5,color:accent,marginBottom:2}}>→ {r}</div>
+              ))}
+            </div>
+          )}
+          <div style={{marginTop:10,fontSize:9.5,color:'rgba(255,255,255,0.30)',textAlign:'center'}}>
+            习惯健康分 · 不是信用评分
+          </div>
+        </div>
+
+        {/* 搭子档案 */}
+        <div style={{padding:'0 22px 8px',fontSize:16,fontWeight:800}}>我的搭子档案</div>
+        <div style={{margin:'0 18px 16px',borderRadius:20,padding:'14px 16px',
+          background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',
+          boxShadow:'inset 0 1px 0 rgba(255,255,255,0.8),0 4px 18px rgba(0,0,0,0.05)',border:'0.5px solid rgba(0,0,0,0.04)',
+        }}>
+          {[
+            {l:'当前目标', v:plan?.savingGoal?`本月攒 ¥${plan.savingGoal}`:'未设置'},
+            {l:'今日预算', v:plan?.dailyBudget?`¥${plan.dailyBudget}`:'未设置'},
+            {l:'最近状态', v:review?(review.overBudget?'最近有超支，继续观察':'预算执行不错'):'暂无复盘记录'},
+            {l:'健康得分', v:`${health.score} 分 · ${health.status}`},
+          ].map((item,i)=>(
+            <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',
+              paddingBottom:i<3?10:0,marginBottom:i<3?10:0,
+              borderBottom:i<3?'0.5px solid rgba(0,0,0,0.06)':'none',
+            }}>
+              <span style={{fontSize:12,color:'#9a9a96',fontWeight:600}}>{item.l}</span>
+              <span style={{fontSize:13,fontWeight:700,color:'#0a0a0a'}}>{item.v}</span>
             </div>
           ))}
         </div>
@@ -1369,7 +1989,7 @@ function ProfileScreen({onNav,accent,accentInk,navStyle,chatOpen}){
    CHAT OVERLAY  — 原版视觉 + 真实 API
    ════════════════════════════════════════════════════════════════ */
 function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
-  const INIT=[{id:'init',role:'assistant',text:'你好呀，我是攒钱搭子 👋\n可以拆目标、复盘消费、解释风险 —— 你今天想聊哪个？'}];
+  const INIT=[{id:'init',role:'assistant',text:'嗨，我是招小财，你的理财搭子。不说教，不责备，只帮你把账算清楚。\n\n你可以跟我说：\n· 我想攒钱，帮我做计划\n· 今天花了多少，帮我复盘\n· 还剩X元要撑Y天，急救一下\n· 想买个东西，帮我想想值不值\n\n先说哪个？'}];
   const [msgs,setMsgs]=useState(INIT);
   const [input,setInput]=useState('');
   const [typing,setTyping]=useState(false);
@@ -1386,19 +2006,70 @@ function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
     setMsgs(m=>[...m,{id:Date.now()+'u',role:'user',text:t}]);
     setTyping(true);
     try{
-      const data=await apiPost('/api/chat',{message:t,profile:plan});
+      const convoMsgs=msgs.filter(m=>m.role==='user'||m.role==='assistant');
+      const history=convoMsgs.slice(-10).map(m=>({role:m.role,text:m.text}));
+      const data=await apiPost('/api/chat',{message:t,profile:plan,history});
       setTyping(false);
+
+      // 映射卡片
       let card=null;
       if(data.card){
         const c=data.card;
-        if(c.type==='expense_review_card')
-          card={label:'今日支出',value:String(c.total),unit:'元',badge:c.overBudget?`超¥${c.overAmount}`:'未超支',sub:`必要¥${c.catTotals.necessary} 可优化¥${c.catTotals.optimizable}`};
+        if(c.type==='expense_review_card'&&c.total!=null){
+          const z=c.zone;
+          const zoneBadge=z?.zone==='green'?'绿色区✓':z?.zone==='yellow'?'黄色区':z?.zone==='red'?'红色区!':(c.overBudget?`超¥${c.overAmount}`:'未超支');
+          const repairSub=c.repair?`修复：平摊${c.repair.remainingDays}天，每天少花¥${c.repair.dailyAdjustment}`:`必要¥${(c.catTotals||{}).necessary||0} 可优化¥${(c.catTotals||{}).optimizable||0}`;
+          card={label:'今日支出',value:String(c.total),unit:'元',badge:zoneBadge,badgeColor:z?.color||(c.overBudget?'#ff7043':accent),
+            sub:repairSub,extra:{zone:z,repair:c.repair}};
+        }
         else if(c.type==='saving_plan_card')
           card={label:'每日预算',value:String(c.dailyBudget),unit:'元/天',badge:c.feasibility,sub:`每周¥${c.weeklyBudget}`};
         else if(c.type==='risk_education_card')
-          card={label:'风险等级',value:c.riskLevel,unit:`${c.riskScore}/5`,badge:c.studentSuitability,sub:c.disclaimer};
+          card={label:'风险等级',value:c.riskLevel,unit:`${c.riskScore}/5`,badge:c.studentSuitability,sub:'不构成投资建议'};
+        else if(c.type==='spending_analysis_card')
+          card={type:'analysis',label:`过去${c.period?.days||14}天复盘`,value:`¥${c.totalSpent}`,unit:'总消费',badge:`日均¥${c.dailyAvg}`,
+            sub:`必要${c.catPct?.necessary||0}% · 可优化${c.catPct?.optimizable||0}% · 冲动${c.catPct?.impulsive||0}%`,
+            extra:{catTotals:c.catTotals,catPct:c.catPct,topItems:c.topItems,daysOver:c.daysOver,insights:c.insights||[],nextAction:c.nextAction}};
+        else if(c.type==='rescue_mode_card')
+          card={type:'rescue',label:'月末急救',value:String(c.dailySurvival),unit:'元/天上限',badge:c.riskLevel,
+            extra:{remaining:c.remaining,days:c.days,stopItems:c.stopItems,todayAction:c.todayAction,foodBudget:c.foodBudget,riskColor:c.riskColor}};
+        else if(c.type==='what_if_card')
+          card={type:'whatif',label:'预算推演',value:`¥${c.monthlyChange}`,unit:'月节省',badge:`目标${c.goalImpact}%`,
+            extra:{itemName:c.itemName,goalImpact:c.goalImpact,savingGoal:c.savingGoal,changeDirection:c.changeDirection,freqLabel:c.freqLabel,frequency:c.frequency,insight:c.insight}};
+        else if(c.type==='impulse_check_card')
+          card={type:'impulse',label:'冲动消费检测',value:`¥${c.price}`,unit:c.itemName,
+            badge:c.recommendation==='safe'?'问题不大':c.recommendation==='cooldown'?'冷静24小时':'列入计划',
+            extra:{equivDays:c.equivDays,goalImpact:c.goalImpact,affectsGoal:c.affectsGoal,recommendation:c.recommendation,cooldownHours:c.cooldownHours,alternativeAction:c.alternativeAction}};
+        else if(c.type==='checkin_card')
+          card={type:'checkin',label:'今日打卡',value:'✓',unit:'完成',badge:'坚持就是赢',badgeColor:'#16b86c',
+            sub:c.date,extra:{message:c.message,date:c.date}};
+        else if(c.type==='alternative_card')
+          card={type:'alternative',label:`${c.item}替代方案`,value:`¥${c.monthlySpend}`,unit:'月消费',badge:'4种方案',
+            extra:{item:c.item,alternatives:c.alternatives,savingGoal:c.savingGoal}};
+        else if(c.type==='investment_readiness_card')
+          card={type:'invest',label:'投资准备度',value:c.stage,unit:'',badge:c.readiness==='not_ready'?'暂不建议投入':c.readiness==='marginal'?'谨慎观望':'可以学习入门',
+            badgeColor:c.readinessColor,
+            extra:{readiness:c.readiness,remainingBalance:c.remainingBalance,daysToMonthEnd:c.daysToMonthEnd,dailyAvg:c.dailyAvg,projectedNeed:c.projectedNeed,shortfall:c.shortfall,cashFlowTight:c.cashFlowTight,hasEmergencyFund:c.hasEmergencyFund,investAmount:c.investAmount,nextSteps:c.nextSteps,disclaimer:c.disclaimer}};
       }
-      setMsgs(m=>[...m,{id:Date.now()+'a',role:'assistant',text:data.reply,card}]);
+
+      // emotion 卡（情绪场景）
+      const emotionBubble = data.emotion?.type==='comforting'||data.emotion?.type==='encouraging'
+        ? data.emotion.text : null;
+
+      // 数据同步：Agent 修改了 DB → 通知首页刷新
+      if(data.dataUpdated){
+        window.dispatchEvent(new CustomEvent('mb-data-updated'));
+        // 更新本地 localStorage 里的 plan，以便其他页面知道数据变了
+        const plan=getLS('mb_plan');
+        if(plan&&data.card?.type==='saving_plan_card'){
+          setLS('mb_plan',{...plan,dailyBudget:data.card.dailyBudget,weeklyBudget:data.card.weeklyBudget,savingGoal:data.card.savingGoal??plan.savingGoal});
+        }
+      }
+
+      const syncNote=data.syncNote||null;
+      const newMsg = {id:Date.now()+'a',role:'assistant',text:data.reply,card,emotionBubble,syncNote};
+      const suggestions = data.nextSuggestions||[];
+      setMsgs(m=>[...m,newMsg,...(suggestions.length?[{id:Date.now()+'s',role:'suggestions',items:suggestions}]:[])]);
     }catch{
       setTyping(false);
       setMsgs(m=>[...m,{id:Date.now()+'a',role:'assistant',text:'网络好像出了点问题，稍后再试？'}]);
@@ -1414,8 +2085,8 @@ function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
         opacity:open?1:0,pointerEvents:open?'auto':'none',transition:'opacity .25s ease',
       }}/>
       <div style={{
-        position:'absolute',left:10,right:10,bottom:90,
-        height:'58%',zIndex:50,borderRadius:32,
+        position:'absolute',left:10,right:10,bottom:96,
+        height:'75%',zIndex:50,borderRadius:32,
         background:'rgba(255,255,255,0.62)',
         backdropFilter:'blur(40px) saturate(200%)',WebkitBackdropFilter:'blur(40px) saturate(200%)',
         border:'0.5px solid rgba(255,255,255,0.8)',
@@ -1430,10 +2101,10 @@ function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
           <div style={{position:'absolute',top:7,left:'50%',transform:'translateX(-50%)',width:38,height:4,borderRadius:999,background:'rgba(0,0,0,0.18)'}}/>
           <Buddy size={32} variant={avatarVariant} accent={accent}/>
           <div style={{flex:1,marginTop:4}}>
-            <div style={{fontSize:14,fontWeight:800,color:'#0a0a0a'}}>攒钱搭子</div>
+            <div style={{fontSize:14,fontWeight:800,color:'#0a0a0a'}}>招小财</div>
             <div style={{display:'flex',alignItems:'center',gap:5}}>
               <span style={{width:5,height:5,borderRadius:999,background:'#16b86c'}}/>
-              <span style={{fontSize:10.5,color:'#9a9a96',fontWeight:600}}>实时同步 · 不推销产品</span>
+              <span style={{fontSize:10.5,color:'#9a9a96',fontWeight:600}}>ONLINE</span>
             </div>
           </div>
           <button onClick={onClose} className="press" style={{width:36,height:36,borderRadius:18,border:0,background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>
@@ -1443,35 +2114,221 @@ function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
 
         {/* MESSAGES */}
         <div className="app-scroll" style={{flex:1,overflowY:'auto',padding:'14px 16px 8px'}}>
-          {msgs.map(m=>(
-            <div key={m.id} style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start',alignItems:'flex-end',gap:8,marginBottom:10}}>
-              {m.role==='assistant'&&<Buddy size={28} variant={avatarVariant} accent={accent}/>}
-              <div style={{
-                maxWidth:'78%',padding:'10px 14px',fontSize:13.5,lineHeight:1.55,
-                background:m.role==='user'?'rgba(10,10,14,0.90)':'rgba(255,255,255,0.72)',backdropFilter:'blur(24px) saturate(180%)',WebkitBackdropFilter:'blur(24px) saturate(180%)',
-                color:m.role==='user'?'#fff':'#0a0a0a',
-                border:m.role==='user'?'0.5px solid rgba(255,255,255,0.12)':'0.5px solid rgba(255,255,255,0.9)',
-                boxShadow:m.role==='user'?'inset 0 1px 0 rgba(255,255,255,0.10),0 4px 14px rgba(0,0,0,0.18)':'0 1px 3px rgba(0,0,0,0.05)',
-                borderRadius:m.role==='user'?'20px 20px 6px 20px':'20px 20px 20px 6px',
-                whiteSpace:'pre-wrap',
-              }}>
-                {m.text}
-                {m.card&&(
-                  <div style={{marginTop:8,padding:'10px 12px',borderRadius:14,background:'rgba(255,255,255,0.45)',backdropFilter:'blur(16px)',WebkitBackdropFilter:'blur(16px)',border:'0.5px solid rgba(255,255,255,0.80)'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
-                      <span style={{fontSize:10,fontWeight:800,color:'#9a9a96',letterSpacing:'0.12em'}}>{m.card.label}</span>
-                      {m.card.badge&&<span style={{fontSize:10,fontWeight:800,padding:'2px 7px',borderRadius:999,background:accent,color:accentInk}}>{m.card.badge}</span>}
+          {msgs.map(m=>{
+            // suggestions 行
+            if(m.role==='suggestions') return(
+              <div key={m.id} style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:12,paddingLeft:36}}>
+                {m.items.map(s=>(
+                  <button key={s} onClick={()=>send(s)} style={{
+                    fontSize:11.5,fontWeight:600,padding:'6px 12px',borderRadius:999,cursor:'pointer',
+                    background:'rgba(255,255,255,0.65)',backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
+                    border:'0.5px solid rgba(0,0,0,0.06)',color:'#3a3a38',whiteSpace:'nowrap',
+                  }}>{s}</button>
+                ))}
+              </div>
+            );
+
+            return(
+            <div key={m.id} style={{marginBottom:10}}>
+              {/* emotion bubble（情绪陪伴时显示）*/}
+              {m.emotionBubble&&(
+                <div style={{
+                  marginBottom:6,marginLeft:36,
+                  display:'inline-block',padding:'6px 12px',borderRadius:14,
+                  background:`${accent}22`,
+                  border:`1px solid ${accent}44`,
+                  fontSize:12,fontWeight:600,color:'#0a0a0a',
+                }}>{m.emotionBubble}</div>
+              )}
+              <div style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start',alignItems:'flex-end',gap:8}}>
+                {m.role==='assistant'&&<Buddy size={28} variant={avatarVariant} accent={accent}/>}
+                <div style={{
+                  maxWidth:'78%',padding:'10px 14px',fontSize:13.5,lineHeight:1.55,
+                  background:m.role==='user'?'rgba(10,10,14,0.90)':'rgba(255,255,255,0.72)',
+                  backdropFilter:'blur(24px) saturate(180%)',WebkitBackdropFilter:'blur(24px) saturate(180%)',
+                  color:m.role==='user'?'#fff':'#0a0a0a',
+                  border:m.role==='user'?'0.5px solid rgba(255,255,255,0.12)':'0.5px solid rgba(255,255,255,0.9)',
+                  boxShadow:m.role==='user'?'inset 0 1px 0 rgba(255,255,255,0.10),0 4px 14px rgba(0,0,0,0.18)':'0 1px 3px rgba(0,0,0,0.05)',
+                  borderRadius:m.role==='user'?'20px 20px 6px 20px':'20px 20px 20px 6px',
+                  whiteSpace:'pre-wrap',
+                }}>
+                  {m.text}
+                  {/* 数据同步提示 */}
+                  {m.syncNote&&(
+                    <div style={{marginTop:6,display:'inline-flex',alignItems:'center',gap:4,
+                      padding:'3px 8px',borderRadius:999,
+                      background:'rgba(22,184,108,0.12)',border:'0.5px solid rgba(22,184,108,0.3)'}}>
+                      <span style={{fontSize:8,color:'#16b86c',fontWeight:800}}>✓</span>
+                      <span style={{fontSize:9.5,color:'#16b86c',fontWeight:700}}>{m.syncNote}</span>
                     </div>
-                    <div style={{display:'flex',alignItems:'flex-end',gap:4,marginTop:4}}>
-                      <span className="num" style={{fontSize:26,fontWeight:900,color:'#0a0a0a'}}>{m.card.value}</span>
-                      <span style={{fontSize:12,color:'#9a9a96',fontWeight:600,marginBottom:2}}>{m.card.unit}</span>
+                  )}
+                  {m.card&&(
+                    <div style={{marginTop:8,padding:'10px 12px',borderRadius:14,background:'rgba(255,255,255,0.45)',backdropFilter:'blur(16px)',WebkitBackdropFilter:'blur(16px)',border:'0.5px solid rgba(255,255,255,0.80)'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}>
+                        <span style={{fontSize:10,fontWeight:800,color:'#9a9a96',letterSpacing:'0.12em'}}>{m.card.label}</span>
+                        {m.card.badge&&<span style={{
+                          fontSize:10,fontWeight:800,padding:'2px 7px',borderRadius:999,
+                          background:m.card.badgeColor||(m.card.type==='rescue'?(m.card.extra?.riskColor==='critical'?'#e53935':m.card.extra?.riskColor==='tight'?'#ff7043':accent):accent),
+                          color:'#0a0a0a',
+                        }}>{m.card.badge}</span>}
+                      </div>
+                      <div style={{display:'flex',alignItems:'flex-end',gap:4,marginTop:4}}>
+                        <span className="num" style={{fontSize:26,fontWeight:900,color:'#0a0a0a'}}>{m.card.value}</span>
+                        <span style={{fontSize:12,color:'#9a9a96',fontWeight:600,marginBottom:2}}>{m.card.unit}</span>
+                      </div>
+                      {m.card.sub&&<div style={{fontSize:10.5,color:'#9a9a96',marginTop:2}}>{m.card.sub}</div>}
+
+                      {/* 月末急救卡 */}
+                      {m.card.type==='rescue'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        return(<>
+                          <div style={{marginTop:8,display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+                            <div style={{padding:'6px 8px',borderRadius:8,background:'rgba(0,0,0,0.05)'}}>
+                              <div style={{fontSize:9,color:'#9a9a96',fontWeight:700}}>剩余金额</div>
+                              <div className="num" style={{fontSize:16,fontWeight:900}}>¥{e.remaining}</div>
+                            </div>
+                            <div style={{padding:'6px 8px',borderRadius:8,background:'rgba(0,0,0,0.05)'}}>
+                              <div style={{fontSize:9,color:'#9a9a96',fontWeight:700}}>剩余天数</div>
+                              <div className="num" style={{fontSize:16,fontWeight:900}}>{e.days} 天</div>
+                            </div>
+                          </div>
+                          {e.stopItems?.length>0&&<div style={{marginTop:6,fontSize:9.5,color:'#9a9a96'}}>暂停：{e.stopItems.join('、')}</div>}
+                          {e.todayAction&&<div style={{marginTop:6,padding:'5px 8px',borderRadius:8,background:'rgba(229,57,53,0.10)',border:'0.5px solid rgba(229,57,53,0.25)',fontSize:10,fontWeight:700,color:'#c62828'}}>今日行动：{e.todayAction}</div>}
+                        </>);
+                      })()}
+
+                      {/* What-if 推演卡 */}
+                      {m.card.type==='whatif'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        const barW=Math.min(100,e.goalImpact||0);
+                        return(<>
+                          <div style={{marginTop:8}}>
+                            <div style={{fontSize:9,color:'#9a9a96',fontWeight:700,marginBottom:4}}>目标贡献度 {e.goalImpact}%</div>
+                            <div style={{height:6,borderRadius:999,background:'rgba(0,0,0,0.08)',overflow:'hidden'}}>
+                              <div style={{height:'100%',width:`${barW}%`,background:accent,borderRadius:999,transition:'width .6s ease'}}/>
+                            </div>
+                          </div>
+                          {e.itemName&&e.itemName!=='该消费'&&<div style={{marginTop:5,fontSize:9.5,color:'#9a9a96'}}>涉及：{e.itemName} · 目标 ¥{e.savingGoal}</div>}
+                          {e.insight&&<div style={{marginTop:6,padding:'5px 8px',borderRadius:8,background:`${accent}22`,fontSize:10,fontWeight:700,color:'#0a0a0a'}}>{e.insight}</div>}
+                        </>);
+                      })()}
+
+                      {/* 冲动消费检测卡 */}
+                      {m.card.type==='impulse'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        const recColors={safe:'rgba(22,184,108,0.15)',cooldown:'rgba(255,112,67,0.15)',plan:`${accent}22`};
+                        const recText={safe:'可以考虑购买',cooldown:`冷静 ${e.cooldownHours}h 再决定`,plan:'列入下月计划'};
+                        return(<>
+                          {e.equivDays&&<div style={{marginTop:6,fontSize:9.5,color:'#9a9a96'}}>约等于 {e.equivDays} 天日预算 · 影响目标 {e.goalImpact}%</div>}
+                          <div style={{marginTop:6,padding:'5px 8px',borderRadius:8,background:recColors[e.recommendation]||`${accent}22`,fontSize:10,fontWeight:700,color:'#0a0a0a'}}>
+                            {recText[e.recommendation]||'建议思考后决定'}
+                          </div>
+                          {e.alternativeAction&&<div style={{marginTop:4,fontSize:9.5,color:'#9a9a96'}}>{e.alternativeAction}</div>}
+                        </>);
+                      })()}
+
+                      {/* spending_analysis 扩展分类条 */}
+                      {m.card.type==='analysis'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        const CATS=[
+                          {k:'necessary',   l:'必要',   c:'rgba(255,255,255,0.92)'},
+                          {k:'optimizable', l:'可优化', c:'rgba(200,255,58,0.85)'},
+                          {k:'impulsive',   l:'冲动',   c:accent},
+                          {k:'learning',    l:'学习',   c:'rgba(0,0,0,0.35)'},
+                        ];
+                        const total=Object.values(e.catTotals||{}).reduce((s,v)=>s+v,0)||1;
+                        return(<>
+                          <div style={{height:6,background:'rgba(0,0,0,0.06)',borderRadius:999,marginTop:10,display:'flex',overflow:'hidden',gap:1}}>
+                            {CATS.map(ct=><div key={ct.k} style={{width:`${(e.catTotals?.[ct.k]||0)/total*100}%`,background:ct.c}}/>)}
+                          </div>
+                          <div style={{display:'flex',justifyContent:'space-between',marginTop:5}}>
+                            {CATS.map(ct=>(
+                              <div key={ct.k} style={{display:'flex',alignItems:'center',gap:3}}>
+                                <span style={{width:5,height:5,borderRadius:999,background:ct.c,flexShrink:0}}/>
+                                <span style={{fontSize:9,color:'#9a9a96',fontWeight:600}}>{ct.l} ¥{e.catTotals?.[ct.k]||0}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {e.topItems?.length>0&&<div style={{marginTop:6,fontSize:9.5,color:'#9a9a96'}}>主要漏洞：{e.topItems.join(' · ')}</div>}
+                          {e.nextAction&&<div style={{marginTop:6,padding:'5px 8px',borderRadius:8,background:`${accent}22`,fontSize:10,fontWeight:700,color:'#0a0a0a'}}>💡 {e.nextAction}</div>}
+                        </>);
+                      })()}
+
+                      {/* 打卡卡 */}
+                      {m.card.type==='checkin'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        return(
+                          <div style={{marginTop:8,padding:'8px 10px',borderRadius:10,background:'rgba(22,184,108,0.12)',border:'0.5px solid rgba(22,184,108,0.30)',textAlign:'center'}}>
+                            <div style={{fontSize:20,marginBottom:4}}>🎯</div>
+                            <div style={{fontSize:11,fontWeight:800,color:'#16b86c'}}>{e.message||'今日目标完成！'}</div>
+                            <div style={{fontSize:9.5,color:'#9a9a96',marginTop:2}}>{e.date}</div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* 消费替代方案卡 */}
+                      {m.card.type==='alternative'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        const pc={'极低':'rgba(22,184,108,0.12)','低':'rgba(200,255,58,0.12)','中':'rgba(255,152,0,0.12)','高':'rgba(229,57,53,0.08)'};
+                        return(
+                          <div style={{marginTop:8}}>
+                            {(e.alternatives||[]).map(a=>(
+                              <div key={a.plan} style={{marginBottom:5,padding:'6px 8px',borderRadius:8,background:pc[a.pressure]||'rgba(0,0,0,0.04)',border:'0.5px solid rgba(0,0,0,0.06)'}}>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                                  <span style={{fontSize:10,fontWeight:800,color:'#0a0a0a'}}>方案{a.plan}·{a.label}</span>
+                                  <span style={{fontSize:9,color:'#9a9a96',fontWeight:600}}>压力:{a.pressure}</span>
+                                </div>
+                                <div style={{fontSize:9.5,color:'#3a3a38',marginTop:2}}>{a.desc}</div>
+                                <div style={{fontSize:10,fontWeight:800,color:'#16b86c',marginTop:2}}>月省 ¥{a.monthlySaving}</div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                      {m.card.type==='invest'&&m.card.extra&&(()=>{
+                        const e=m.card.extra;
+                        const readinessColor=e.readiness==='not_ready'?'#ff7043':e.readiness==='marginal'?'#ffd54f':'#c8ff3a';
+                        const readinessLabel=e.readiness==='not_ready'?'暂不建议':e.readiness==='marginal'?'谨慎观望':'可以学习';
+                        return(
+                          <div style={{marginTop:8}}>
+                            {/* 现金流状态行 */}
+                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5,marginBottom:8}}>
+                              {[
+                                {label:'当前余额',val:`¥${e.remainingBalance}`,color:'#f8f8f6'},
+                                {label:`还剩${e.daysToMonthEnd}天`,val:`预计¥${e.projectedNeed}`,color:e.cashFlowTight?'rgba(255,112,67,0.1)':'rgba(22,184,108,0.1)'},
+                                {label:'日均消费',val:`¥${e.dailyAvg}/天`,color:'#f8f8f6'},
+                              ].map(item=>(
+                                <div key={item.label} style={{background:item.color,borderRadius:6,padding:'5px 6px',textAlign:'center'}}>
+                                  <div style={{fontSize:9,color:'#8a8a86',marginBottom:2}}>{item.label}</div>
+                                  <div style={{fontSize:10.5,fontWeight:800,color:'#0a0a0a'}}>{item.val}</div>
+                                </div>
+                              ))}
+                            </div>
+                            {/* 状态标签 */}
+                            <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap'}}>
+                              <span style={{fontSize:9.5,padding:'2px 7px',borderRadius:99,background:`${readinessColor}22`,color:readinessColor,fontWeight:700,border:`1px solid ${readinessColor}44`}}>{readinessLabel}</span>
+                              <span style={{fontSize:9.5,padding:'2px 7px',borderRadius:99,background:'rgba(0,0,0,0.04)',color:'#6a6a66',fontWeight:600}}>{e.hasEmergencyFund?'✓ 有应急金':'✗ 应急金不足'}</span>
+                              {e.cashFlowTight&&<span style={{fontSize:9.5,padding:'2px 7px',borderRadius:99,background:'rgba(255,112,67,0.1)',color:'#ff7043',fontWeight:600}}>⚠ 现金流偏紧</span>}
+                            </div>
+                            {/* 行动建议 */}
+                            {(e.nextSteps||[]).map((s,i)=>(
+                              <div key={i} style={{display:'flex',gap:7,alignItems:'flex-start',marginBottom:4}}>
+                                <span style={{minWidth:16,height:16,borderRadius:99,background:'rgba(200,255,58,0.15)',border:'1px solid rgba(200,255,58,0.4)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8.5,fontWeight:800,color:'#6a8a00',flexShrink:0,marginTop:1}}>{i+1}</span>
+                                <span style={{fontSize:9.5,color:'#3a3a38',lineHeight:1.4}}>{s}</span>
+                              </div>
+                            ))}
+                            {/* 免责声明 */}
+                            {e.disclaimer&&<div style={{marginTop:8,fontSize:8.5,color:'#9a9a96',borderTop:'0.5px solid rgba(0,0,0,0.06)',paddingTop:6,lineHeight:1.4}}>{e.disclaimer}</div>}
+                          </div>
+                        );
+                      })()}
                     </div>
-                    {m.card.sub&&<div style={{fontSize:10.5,color:'#9a9a96',marginTop:2}}>{m.card.sub}</div>}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
           {typing&&(
             <div style={{display:'flex',alignItems:'flex-end',gap:8,marginBottom:10}}>
               <Buddy size={28} variant={avatarVariant} accent={accent}/>
@@ -1485,10 +2342,21 @@ function ChatOverlay({open,onClose,accent,accentInk,avatarVariant}){
 
         {/* CHIPS */}
         {msgs.length<=2&&(
-          <div style={{display:'flex',gap:6,overflowX:'auto',padding:'0 16px 8px'}}>
-            {['帮我算每日预算','今天能买基金吗','存 600 难吗','消费分类'].map(c=>(
-              <button key={c} onClick={()=>send(c)} className="press" style={{flexShrink:0,fontSize:12,fontWeight:600,padding:'7px 12px',borderRadius:999,cursor:'pointer',background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',color:'#3a3a38',whiteSpace:'nowrap',border:'0.5px solid rgba(0,0,0,0.06)'}}>{c}</button>
-            ))}
+          <div>
+            <div style={{display:'flex',gap:6,overflowX:'auto',padding:'0 16px 6px'}}>
+              {[
+                {label:'攒钱计划',msg:'我想攒钱，帮我制定计划'},
+                {label:'消费复盘',msg:'帮我复盘今天消费'},
+                {label:'月末急救',msg:'我还剩180元，要撑7天，怎么办'},
+                {label:'What-if推演',msg:'如果我每周少喝3杯奶茶能省多少'},
+                {label:'风险守门',msg:'基金会亏吗'},
+              ].map(c=>(
+                <button key={c.label} onClick={()=>send(c.msg)} className="press" style={{flexShrink:0,fontSize:12,fontWeight:600,padding:'7px 12px',borderRadius:999,cursor:'pointer',background:'rgba(255,255,255,0.60)',backdropFilter:'blur(28px) saturate(180%)',WebkitBackdropFilter:'blur(28px) saturate(180%)',color:'#3a3a38',whiteSpace:'nowrap',border:'0.5px solid rgba(0,0,0,0.06)'}}>{c.label}</button>
+              ))}
+            </div>
+            <div style={{padding:'0 16px 4px',fontSize:10,color:'#b0b0ac',fontWeight:600}}>
+              WarmPlan · GentleReview · RescueMode · What-if · RiskGuard
+            </div>
           </div>
         )}
 

@@ -26,18 +26,23 @@ const router = Router();
  */
 router.post('/', async (req, res) => {
   try {
-    const { monthlyIncome, extraIncome = 0, fixedExpense, savingGoal, remainingDays, style = 'balanced' } = req.body;
+    const { monthlyIncome, extraIncome = 0, fixedExpense, savingGoal, style = 'balanced' } = req.body;
 
     // Validate required fields
-    if (!monthlyIncome || !fixedExpense || savingGoal === undefined || !remainingDays) {
+    if (!monthlyIncome || !fixedExpense || savingGoal === undefined) {
       return res.status(400).json({
         error: 'missing_fields',
-        message: '需要提供：月生活费、固定支出、攒钱目标、剩余天数',
-        missingFields: ['monthlyIncome', 'fixedExpense', 'savingGoal', 'remainingDays'].filter(
+        message: '需要提供：月生活费、固定支出、攒钱目标',
+        missingFields: ['monthlyIncome', 'fixedExpense', 'savingGoal'].filter(
           (k) => req.body[k] === undefined || req.body[k] === null || req.body[k] === '',
         ),
       });
     }
+
+    // 自然月剩余天数（含今天）
+    const todayDate = new Date();
+    const lastDayOfMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0).getDate();
+    const remainingDays = Math.max(1, lastDayOfMonth - todayDate.getDate() + 1);
 
     // 1. Deterministic budget calculation
     const calc = calculateBudget({ monthlyIncome, extraIncome, fixedExpense, savingGoal, remainingDays, style });
@@ -69,7 +74,6 @@ router.post('/', async (req, res) => {
       extraIncome:      Number(extraIncome) || 0,
       fixedExpense:     Number(fixedExpense),
       savingGoal:       Number(savingGoal),
-      remainingDays:    Number(remainingDays),
       style,
       dailyBudget:      calc.dailyBudget,
       weeklyBudget:     calc.weeklyBudget,

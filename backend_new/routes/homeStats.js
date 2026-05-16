@@ -13,6 +13,11 @@ const router = Router();
 router.get('/', (req, res) => {
   const profile = db.getProfile();
 
+  // 自然月剩余天数：今天到月底最后一天
+  const todayDate = new Date();
+  const lastDayOfMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 1, 0).getDate();
+  const remainingDays = Math.max(1, lastDayOfMonth - todayDate.getDate() + 1);
+
   // 计算每日预算（用 db 里存的 profile 字段）
   let plan;
   if (profile.monthlyIncome && profile.fixedExpense) {
@@ -21,7 +26,7 @@ router.get('/', (req, res) => {
       extraIncome:    profile.extraIncome  || 0,
       fixedExpense:   profile.fixedExpense,
       savingGoal:     profile.savingGoal   || 0,
-      remainingDays:  profile.remainingDays || 15,
+      remainingDays,
       style:          profile.style        || 'balanced',
     });
   } else {
@@ -50,7 +55,6 @@ router.get('/', (req, res) => {
 
   const savingGoal    = profile.savingGoal    || 600;
   const savedAmount   = profile.savedAmount   || 0;
-  const remainingDays = profile.remainingDays || 15;
   const streak        = profile.streak        || 0;
 
   // 本月已花 & 剩余（用于饼图）
@@ -77,6 +81,13 @@ router.get('/', (req, res) => {
     feasibility:     plan.feasibility,
     chartData:       [...raw, ...predicted],
     predictedCount:  2,
+    profile: {
+      monthlyIncome: profile.monthlyIncome || 0,
+      extraIncome:   profile.extraIncome   || 0,
+      fixedExpense:  profile.fixedExpense  || 0,
+      savingGoal:    profile.savingGoal    || 0,
+      style:         profile.style         || 'balanced',
+    },
   });
 });
 

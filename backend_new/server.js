@@ -13,6 +13,8 @@ const chatRouter          = require('./routes/chat');
 const homeStatsRouter     = require('./routes/homeStats');
 const chartDataRouter     = require('./routes/chartData');
 const profileRouter       = require('./routes/profile');
+const spendingUpdateRouter = require('./routes/spendingUpdate');
+const financeGuideRouter   = require('./routes/financeGuide');
 
 const path = require('path');
 const db   = require('./lib/db');
@@ -83,6 +85,8 @@ app.use('/api/chat',           chatRouter);
 app.use('/api/home-stats',     homeStatsRouter);
 app.use('/api/chart-data',    chartDataRouter);
 app.use('/api/profile',        profileRouter);
+app.use('/api/spending',       spendingUpdateRouter);
+app.use('/api/finance-guide', financeGuideRouter);
 
 // ─── Error handler ────────────────────────────────────────────────────
 

@@ -21,9 +21,10 @@ function isDemoMode() {
 
 /**
  * Call the LLM with a system prompt + user message.
+ * history: [{role:'user'|'assistant', content: string}] — actual multi-turn messages
  * Returns the raw string response.
  */
-async function chat(systemPrompt, userMessage, { json = false, temperature = 0.7, maxTokens = 1200 } = {}) {
+async function chat(systemPrompt, userMessage, { json = false, temperature = 0.7, maxTokens = 1200, history = [] } = {}) {
   if (isDemoMode()) {
     return null; // callers should fall back to deterministic output
   }
@@ -32,15 +33,18 @@ async function chat(systemPrompt, userMessage, { json = false, temperature = 0.7
   const model = process.env.LLM_MODEL
     || (process.env.DEEPSEEK_API_KEY ? 'deepseek-chat' : 'gpt-4o-mini');
 
+  // Build multi-turn messages: system + history + current user message
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...history.map(h => ({ role: h.role, content: h.content })),
+    { role: 'user', content: userMessage },
+  ];
+
   const res = await client.chat.completions.create({
     model,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
-    ],
+    messages,
     temperature,
     max_tokens: maxTokens,
-    // 限制 token 以节省额度
     ...(json ? { response_format: { type: 'json_object' } } : {}),
   });
 
